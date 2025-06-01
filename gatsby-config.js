@@ -1,8 +1,8 @@
 module.exports = {
   siteMetadata: {
-    title: `Gatsby Boostrap 5 Sass Starter`,
-    description: `A simple bootstrap 5 and Sass starter for Gatsby. This barebones starter ships with the main Gatsby configuration files you might need.`,
-    author: `@r-ichard`,
+    title: `Food Truck Alley`,
+    description: `Online directory for locating food trucks.`,
+    author: `@kodemonkey`,
   },
   plugins: [
     `gatsby-plugin-image`,
@@ -24,6 +24,13 @@ module.exports = {
       },
     },
     {
+      resolve: "gatsby-source-filesystem",
+      options: {
+        name: `profile`,
+        path: `${__dirname}/profile`,
+      }
+    },
+    {
       resolve: `gatsby-plugin-manifest`,
       options: {
         name: `gatsby-starter-bootstrap-5`,
@@ -33,6 +40,14 @@ module.exports = {
         theme_color: `#663399`,
         display: `standalone`,
         icon: `src/images/gatsby-icon.png`, // This path is relative to the root of the site.
+      },
+    },
+    `gatsby-plugin-mdx`,
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `profile`,
+        path: `${__dirname}/profile`,
       },
     },
     `gatsby-plugin-gatsby-cloud`,
