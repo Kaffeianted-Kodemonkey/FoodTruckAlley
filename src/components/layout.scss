@@ -1,6 +1,84 @@
 //Here you can customize bootstrap
-$primary: #663399;
+$primary: #1A2A44;
 @import "~bootstrap/scss/bootstrap";
 
+/* Color Scheme for Food Truck Alley */
+:root {
+  --primary-color: #1A2A44; /* Navy Blue */
+  --accent-color: #D4A017; /* Warm Gold */
+  --secondary-color: #F5F5F5; /* Soft White */
+  --highlight-color: #E63946; /* Vibrant Red */
+  --complementary-color: #457B9D; /* Muted Teal */
+}
 
+/* General Styles */
+body {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  font-size: 1.2em;
+}
 
+/* Header Styles */
+header {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  padding: 1rem;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  color: var(--accent-color);
+}
+
+/* Navigation Styles */
+nav {
+  background-color: var(--complementary-color);
+  padding: 0.5rem;
+}
+
+nav a {
+  color: var(--secondary-color);
+  margin: 0 1rem;
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: var(--highlight-color);
+}
+
+/* Main Content Styles */
+main {
+  padding: 2rem;
+}
+
+section {
+  margin-bottom: 2rem;
+}
+
+button, .cta {
+  background-color: var(--highlight-color);
+  color: var(--secondary-color);
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+button:hover, .cta:hover {
+  background-color: var(--accent-color);
+}
+
+/* Footer Styles */
+footer {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  text-align: center;
+  padding: 1rem;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+}

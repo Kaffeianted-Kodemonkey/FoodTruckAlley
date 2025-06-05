@@ -24,7 +24,7 @@ const Navbar = ({ siteTitle }) => {
           <ul className="navbar-nav me-auto mb-2 mb-md-0">
           <li className="nav-item">
             <ExactNavLink
-              to="/"
+              to="/food-trucks"
             >
               Food Trucks
             </ExactNavLink>
@@ -61,8 +61,6 @@ Navbar.propTypes = {
   siteTitle: PropTypes.string,
 }
 
-Navbar.defaultProps = {
-  siteTitle: ``,
-}
+
 
 export default Navbar

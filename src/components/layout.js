@@ -19,7 +19,6 @@ const Layout = ({ pageTitle, children }) => {
   return (
     <div className="container-fluid p-0">
       <Navbar siteTitle={data.site.siteMetadata?.title || `Title`} />
-      <h1 className="ms-5 mt-3">{data.site.siteMetadata.title}</h1>
 
       <main className="ms-5 mt-3 9-5">
         {children}

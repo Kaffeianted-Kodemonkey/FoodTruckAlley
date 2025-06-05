@@ -18,11 +18,11 @@ const IndexPage = ({ data }) => (
           </form>
 
           <StaticImage
-            src="../images/gatsby-astronaut.png"
+            src="../images/usa-logo.png"
             width={300}
             quality={95}
             formats={["AUTO", "WEBP"]}
-            alt="A Gatsby astronaut"
+            alt="Food Truck Ally"
             className="img-fluid"
           />
 
@@ -30,20 +30,22 @@ const IndexPage = ({ data }) => (
       </div>
 
       <div className="row mt-2">
-        {
-          data.allFile.nodes.map(node => (
-            <div className="col-lg-4 col-md-2 mt-3">
-              <div className="card" key={node.name}>
-                <img src="..." className="card-img-top" alt="..." />
-                <div className="card-body">
-                  <h5 class="card-title"><Link to="/">{node.name}</Link></h5>
-                  <p class="card-text">Statue: [Open/Cose]</p>
-                  <p class="card-text">Location: [Current Location]</p>
-                </div>
+      {
+        data.allMdx.nodes.map((node) => (
+          <div className="col-lg-4 col-md-2">
+            <div className="card w-85" key={node.id}>
+              <img src="..." className="card-img-top" alt="..." />
+              <div className="card-body">
+                <h3 class="card-title"><Link to={`/profile/${node.frontmatter.slug}`}>{node.frontmatter.title}</Link></h3>
+                <h4 class="card-text">Status: {node.frontmatter.current_status}</h4>
+                <p class="card-text">Hours: {node.frontmatter.hours}</p>
+                <p class="card-text">Phone: {node.frontmatter.phone}</p>
+                <p class="card-text">Location: {node.frontmatter.location}</p>
               </div>
             </div>
-          ))
-        }
+          </div>
+        ))
+      }
       </div>
 
     </section>
@@ -52,9 +54,17 @@ const IndexPage = ({ data }) => (
 
 export const query = graphql`
   query {
-    allFile {
+    allMdx(sort: {frontmatter: {date: DESC}}) {
       nodes {
-        name
+        frontmatter {
+          title
+          date(formatString: "MMMM D, YYYY")
+          hours
+          slug
+          phone
+          current_status
+          location
+        }
       }
     }
   }
