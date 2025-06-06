@@ -3,6 +3,7 @@ import { Link } from "gatsby"
 import { graphql } from 'gatsby'
 import { StaticImage } from "gatsby-plugin-image"
 
+import FoodTruckMap  from "../components/FoodTruckMap"
 import Layout from "../components/layout"
 import { Seo } from "../components/seo"
 
@@ -16,6 +17,8 @@ const IndexPage = ({ data }) => (
             <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
             <button className="btn btn-outline-success" type="submit">Search</button>
           </form>
+
+          <FoodTruckMap />
 
           <StaticImage
             src="../images/usa-logo.png"
@@ -36,11 +39,11 @@ const IndexPage = ({ data }) => (
             <div className="card w-85" key={node.id}>
               <img src="..." className="card-img-top" alt="..." />
               <div className="card-body">
-                <h3 class="card-title"><Link to={`/profile/${node.frontmatter.slug}`}>{node.frontmatter.title}</Link></h3>
-                <h4 class="card-text">Status: {node.frontmatter.current_status}</h4>
-                <p class="card-text">Hours: {node.frontmatter.hours}</p>
-                <p class="card-text">Phone: {node.frontmatter.phone}</p>
-                <p class="card-text">Location: {node.frontmatter.location}</p>
+                <h3 className="card-title"><Link to={`/profile/${node.frontmatter.slug}`}>{node.frontmatter.title}</Link></h3>
+                <h4 className="card-text">Status: {node.frontmatter.current_status}</h4>
+                <p className="card-text">Hours: {node.frontmatter.hours}</p>
+                <p className="card-text">Phone: {node.frontmatter.phone}</p>
+                <p className="card-text">Location: {node.frontmatter.location}</p>
               </div>
             </div>
           </div>

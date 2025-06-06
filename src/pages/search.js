@@ -18,11 +18,11 @@ const Profile = ({ data }) => {
               <div className="card w-75" key={node.id}>
                 <img src="..." className="card-img-top" alt="..." />
                 <div className="card-body">
-                  <h3 class="card-title"><Link to={`/profile/${node.frontmatter.slug}`}>{node.frontmatter.title}</Link></h3>
-                  <h4 class="card-text">Status: {node.frontmatter.current_status}</h4>
-                  <p class="card-text">Hours: {node.frontmatter.hours}</p>
-                  <p class="card-text">Phone: {node.frontmatter.phone}</p>
-                  <p class="card-text">Location: {node.frontmatter.location}</p>
+                  <h3 className="card-title"><Link to={`/profile/${node.frontmatter.slug}`}>{node.frontmatter.title}</Link></h3>
+                  <h4 className="card-text">Status: {node.frontmatter.current_status}</h4>
+                  <p className="card-text">Hours: {node.frontmatter.hours}</p>
+                  <p className="card-text">Phone: {node.frontmatter.phone}</p>
+                  <p className="card-text">Location: {node.frontmatter.location}</p>
                 </div>
               </div>
             </div>

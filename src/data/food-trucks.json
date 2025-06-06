@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Taco Titan",
+    "lat": 34.0522,
+    "lng": -118.2437,
+    "address": "456 Flavor Street, Los Angeles, CA, 90001"
+  },
+  {
+    "name": "Burger Buzz",
+    "lat": 41.8781,
+    "lng": -87.6298,
+    "address": "789 Taste Ave, Chicago, IL, 60601"
+  },
+  {
+    "name": "Sticky Nikkie's",
+    "lat": 40.7128,
+    "lng": -74.0060,
+    "address": "123 Food Alley, New York, NY, 10001"
+  }
+]
