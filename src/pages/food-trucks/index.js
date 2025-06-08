@@ -56,6 +56,6 @@ export const query = graphql`
   }
 `
 
-export const Head = () => <Seo title="Events - Directory" />
+export const Head = () => <Seo title="Food Trucks - Directory" />
 
 export default FoodTrucks
