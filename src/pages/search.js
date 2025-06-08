@@ -44,7 +44,8 @@ export const query = graphql`
           slug
           phone
           current_status
-          location
+          city
+          state
         }
       }
     }

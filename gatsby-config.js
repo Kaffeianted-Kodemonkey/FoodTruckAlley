@@ -59,5 +59,19 @@ module.exports = {
     },
     `gatsby-plugin-gatsby-cloud`,
     `gatsby-plugin-react-leaflet`,
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `food-trucks`,
+        path: `${__dirname}/src/pages/food-trucks/`,
+      },
+    },
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `images`,
+        path: `${__dirname}/src/images/`,
+      },
+    },
   ],
 }

@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react"
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
 import L from "leaflet"
-import foodTrucksData from "../data/food-trucks.json"
+import axios from "axios"
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png"
 import markerIcon from "leaflet/dist/images/marker-icon.png"
 import markerShadow from "leaflet/dist/images/marker-shadow.png"
 
-const FoodTruckMap = () => {
-  const [foodTrucks, setFoodTrucks] = useState(foodTrucksData)
+const FoodTruckMap = ({ initialLocation, foodTrucks, searchQuery }) => {
   const [userLocation, setUserLocation] = useState(null)
-  const [mapCenter, setMapCenter] = useState([39.8283, -98.5795])
+  const [mapCenter, setMapCenter] = useState([39.8283, -98.5795]) // Default US center
   const [zoom, setZoom] = useState(4)
+  const [truckCoords, setTruckCoords] = useState({})
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
@@ -23,88 +23,75 @@ const FoodTruckMap = () => {
         shadowUrl: markerShadow,
       })
     }
-    console.log("Initial food trucks data:", foodTrucksData)
-  }, [])
-
-  useEffect(() => {
-    console.log("Updated food trucks:", foodTrucks)
-  }, [foodTrucks])
-
-  const handleNearMe = () => {
-    if (navigator.geolocation) {
+    if (initialLocation && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords
           setUserLocation([latitude, longitude])
           setMapCenter([latitude, longitude])
           setZoom(12)
-          const filteredTrucks = foodTrucksData.filter((truck) => {
-            const distance = getDistance(latitude, longitude, truck.lat, truck.lng)
-            return distance <= 50
-          })
-          setFoodTrucks(filteredTrucks)
         },
         (error) => {
-          alert("Unable to get your location. Please allow location access.")
+          console.log("Geolocation error:", error)
         }
       )
-    } else {
-      alert("Geolocation is not supported by your browser.")
     }
-  }
 
-  const getDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 3958.8
-    const dLat = (lat2 - lat1) * (Math.PI / 180)
-    const dLon = (lon2 - lon1) * (Math.PI / 180)
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    return R * c
-  }
+    const geocodeTrucks = async () => {
+      const coords = {}
+      for (const truck of foodTrucks) {
+        const { city, state } = truck.frontmatter
+        if (city && state) {
+          try {
+            const response = await axios.get(
+              `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+                `${city}, ${state}, USA`
+              )}&limit=1`
+            )
+            const result = response.data[0]
+            if (result) {
+              coords[truck.id] = [parseFloat(result.lat), parseFloat(result.lon)]
+            }
+          } catch (error) {
+            console.error(`Geocoding error for ${city}, ${state}:`, error)
+          }
+        }
+      }
+      setTruckCoords(coords)
+    }
+    geocodeTrucks()
+  }, [initialLocation, foodTrucks])
+
+  // Filter markers based on searchQuery
+  const filteredTrucks = foodTrucks.filter((truck) =>
+    truck.frontmatter.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    `${truck.frontmatter.city}, ${truck.frontmatter.state}`.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   return (
     <section style={{ padding: "2rem 0", backgroundColor: "#f5f5f5" }}>
-      <div style={{ maxWidth: "1200px", margin: "0 auto", textAlign: "center" }}>
-        <button
-          type="button"
-          onClick={handleNearMe}
-          style={{
-            padding: "0.5rem 1rem",
-            backgroundColor: "#457b9d",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            marginBottom: "1rem",
-            cursor: "pointer",
-          }}
-        >
-          Near Me
-        </button>
-        <div style={{ height: "300px", width: "100%" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+        <div style={{ height: "400px", width: "100%" }}>
           {isClient ? (
-            <MapContainer
-              center={mapCenter}
-              zoom={zoom}
-              style={{ height: "100%", width: "100%" }}
-            >
+            <MapContainer center={mapCenter} zoom={zoom} style={{ height: "100%", width: "100%" }}>
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
-              {foodTrucks.map((truck, idx) => (
-                <Marker key={`${truck.name}-${truck.lat}-${truck.lng}-${idx}`} position={[truck.lat, truck.lng]}>
-                  <Popup>
-                    <strong>{truck.name}</strong>
-                    <br />
-                    {truck.address}
-                  </Popup>
-                </Marker>
-              ))}
+              {filteredTrucks.map((truck) => {
+                const coords = truckCoords[truck.id]
+                return coords ? (
+                  <Marker key={truck.id} position={coords}>
+                    <Popup>
+                      <strong>{truck.frontmatter.title}</strong>
+                      <br />
+                      {truck.frontmatter.city}, {truck.frontmatter.state}
+                      <br />
+                      Status: {truck.frontmatter.current_status}
+                    </Popup>
+                  </Marker>
+                ) : null
+              })}
               {userLocation && (
                 <Marker position={userLocation}>
                   <Popup>Your Location</Popup>
