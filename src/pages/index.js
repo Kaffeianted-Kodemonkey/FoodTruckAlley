@@ -18,7 +18,7 @@ const IndexPage = ({ data }) => {
     <Layout>
       <section className="py-5 text-center container">
         <div className="row py-lg-5">
-          <div className="col-lg-6 col-md-8 mx-auto">
+          <div className="col-lg-6 col-md-8 mx-auto \">
             <h1 className="fw-light">Locate your Favorite Food Truck:</h1>
             <form
               className="mt-5 mb-5 d-flex"
@@ -51,14 +51,14 @@ const IndexPage = ({ data }) => {
           </div>
         </div>
 
-        <div className="row mt-2">
+        <div className="row">
           {data.allMdx.nodes.map((node) => (
-            <div className="col-lg-4 col-md-2" key={node.id}>
+            <div className="col-lg-4 col-md-2 mt-5" key={node.id}>
               <div className="card w-85">
                 <img src="..." className="card-img-top" alt="..." />
                 <div className="card-body">
                   <h3 className="card-title">
-                    <Link to={`/profile/${node.frontmatter.slug}`}>
+                    <Link to={`/food-trucks/${node.frontmatter.slug}`}>
                       {node.frontmatter.title}
                     </Link>
                   </h3>
@@ -80,7 +80,7 @@ const IndexPage = ({ data }) => {
 
 export const query = graphql`
   query {
-    allMdx(sort: { frontmatter: { date: DESC } }) {
+    allMdx(filter: {frontmatter: {category: {eq: "food-trucks"}}}) {
       nodes {
         frontmatter {
           title

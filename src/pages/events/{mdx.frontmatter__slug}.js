@@ -1,12 +1,10 @@
 import * as React from 'react'
 import { graphql } from 'gatsby'
-import { GatsbyImage, getImage } from 'gatsby-plugin-image'
 import Layout from '../../components/layout'
 import {Seo} from '../../components/seo'
 import FTALogo from "../../images/usa-logo.png"
 
-const BlogPost = ({ data, children }) => {
-const image = getImage(data.mdx.frontmatter.hero_image)
+const EventsList = ({ data, children }) => {
 
   return (
     <Layout pageTitle={data.mdx.frontmatter.title}>
@@ -25,13 +23,7 @@ const image = getImage(data.mdx.frontmatter.hero_image)
 
       <main className="container">
         <div className="row-cols-12">
-          <GatsbyImage
-            image={image}
-            alt={data.mdx.frontmatter.hero_image_alt}
-            objectFit= "cover"
-            style={{ width: "100%", height: "auto" }}
-            className="img-fluid img-thumbnail"
-          />
+
         </div>
         <h2 className="mt-5 mb-5 text-center">{data.mdx.frontmatter.current_status} for Business</h2>
         <hr />
@@ -49,12 +41,6 @@ export const query = graphql`
       frontmatter {
         title
         date(formatString: "MMMM DD, YYYY")
-        hero_image_alt
-        hero_image {
-          childImageSharp {
-            gatsbyImageData
-          }
-        }
         current_status
       }
     }
@@ -62,4 +48,4 @@ export const query = graphql`
 `
 export const Head = ({ data }) => <Seo title={data.mdx.frontmatter.title} />
 
-export default BlogPost
+export default EventsList

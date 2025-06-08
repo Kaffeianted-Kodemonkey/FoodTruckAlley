@@ -26,19 +26,19 @@ const Navbar = ({ siteTitle }) => {
             <ExactNavLink
               to="/food-trucks"
             >
-              Food Trucks
+              FT - Directory
             </ExactNavLink>
           </li>
           <li className="nav-item">
               <ExactNavLink
-                to="/"
+                to="/events"
               >
                 Events
               </ExactNavLink>
             </li>
             <li className="nav-item">
               <ExactNavLink
-                to="/blog"
+                to="/"
               >
                 Blog
               </ExactNavLink>

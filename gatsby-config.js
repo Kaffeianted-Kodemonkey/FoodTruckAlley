@@ -10,7 +10,7 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `images`,
-        path: `${__dirname}/profile`,
+        path: `${__dirname}/food-trucks`,
       },
     },
     `gatsby-transformer-sharp`,
@@ -26,8 +26,8 @@ module.exports = {
     {
       resolve: "gatsby-source-filesystem",
       options: {
-        name: `profile`,
-        path: `${__dirname}/profile`,
+        name: `food-trucks`,
+        path: `${__dirname}/food-trucks`,
       }
     },
     {
@@ -46,8 +46,15 @@ module.exports = {
     {
       resolve: `gatsby-source-filesystem`,
       options: {
-        name: `profile`,
-        path: `${__dirname}/profile`,
+        name: `food-trucks`,
+        path: `${__dirname}/food-trucks`,
+      },
+    },
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `events`,
+        path: `${__dirname}/events`,
       },
     },
     `gatsby-plugin-gatsby-cloud`,
