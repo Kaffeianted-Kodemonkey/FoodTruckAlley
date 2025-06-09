@@ -127,10 +127,10 @@ const IndexPage = ({ data }) => {
 
                       <hr />
 
-                      <p className="card-text fs-4"><strong>Phone:</strong> {node.frontmatter.phone}</p>
-                      <p className="card-text fs-4"><strong>Event:</strong> {node.frontmatter.event}</p>
-                      <p className="card-text fs-4"><strong>Location:</strong> {node.frontmatter.city}, {node.frontmatter.state}</p>
-                      <p className="card-text  fs-4"><strong>Hours:</strong> {node.frontmatter.hours}</p>
+                      <p className="card-text"><strong>Location: </strong>
+                        <Link to={`/events/${node.frontmatter.eventSlug}`}>{node.frontmatter.event}</Link></p>
+                      <p className="card-text"><strong>Hours:</strong> {node.frontmatter.hours} </p>
+
                       <p className="card-text fs-4">
                       <Link to={`/food-trucks/${node.frontmatter.slug}`} className="btn btn-outline-primary mt-2">Directory Listing</Link></p>
                     </div>
@@ -157,7 +157,9 @@ export const query = graphql`
           hours
           slug
           event
+          eventSlug
           phone
+          email
           current_status
           city
           state

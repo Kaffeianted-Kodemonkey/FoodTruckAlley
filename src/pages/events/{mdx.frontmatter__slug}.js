@@ -106,6 +106,9 @@ const FoodTrucks = ({ data, children }) => {
 
         <p>Note: List may change—check back for the latest lineup!</p>
         </div>
+
+        <hr />
+        
         <a href="/events" className="btn btn-primary mt-3"> Back to Event Directory</a>
       </main>
     </Layout>

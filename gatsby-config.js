@@ -63,7 +63,7 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `food-trucks`,
-        path: `${__dirname}/src/pages/food-trucks/`,
+        path: `${__dirname}/food-trucks/`,
       },
     },
     {
