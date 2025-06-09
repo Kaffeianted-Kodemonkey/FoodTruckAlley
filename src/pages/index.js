@@ -117,20 +117,18 @@ const IndexPage = ({ data }) => {
                             {node.frontmatter.title}
                           </Link>
                         </h3>
+                        <p className="card-text fs-4"><strong>Cuisine:</strong> {node.frontmatter.cuisine || "N/A"}</p>
 
                         <span className={`badge ${isOpen ? "bg-success" : "bg-danger"} text-white mb-2 d-inline-block`}
                           style={{ padding: "0.25rem 0.5rem", borderRadius: "0.25rem" }}>
                           {isOpen ? "Open" : "Closed"}
                         </span>
-
-                        <p className="card-text fs-4"><strong>Cuisine:</strong> {node.frontmatter.cuisine || "N/A"}</p>
-
                       </div>
 
                       <hr />
 
                       <p className="card-text fs-4"><strong>Phone:</strong> {node.frontmatter.phone}</p>
-                      <p className="card-text fs-4"><strong>Event:</strong> {node.frontmatter.events}</p>
+                      <p className="card-text fs-4"><strong>Event:</strong> {node.frontmatter.event}</p>
                       <p className="card-text fs-4"><strong>Location:</strong> {node.frontmatter.city}, {node.frontmatter.state}</p>
                       <p className="card-text  fs-4"><strong>Hours:</strong> {node.frontmatter.hours}</p>
                       <p className="card-text fs-4">
@@ -158,6 +156,7 @@ export const query = graphql`
           date(formatString: "MMMM D, YYYY")
           hours
           slug
+          event
           phone
           current_status
           city

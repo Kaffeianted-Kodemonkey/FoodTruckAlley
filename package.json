@@ -10,6 +10,7 @@
     "@popperjs/core": "^2.11.6",
     "axios": "^1.9.0",
     "bootstrap": "^5.2.2",
+    "bootstrap-icons": "^1.13.1",
     "gatsby": "^5.14.0",
     "gatsby-plugin-gatsby-cloud": "^5.1.0",
     "gatsby-plugin-image": "^3.1.0",

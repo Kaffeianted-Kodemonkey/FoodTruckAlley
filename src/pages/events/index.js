@@ -163,7 +163,7 @@ export const query = graphql`
           current_status
           city
           state
-          events
+          event
           hero_image_alt
           hero_image {
             childImageSharp {
