@@ -1,3 +1,7 @@
+
+require("dotenv").config({
+  path: `.env`,
+})
 /**
  * @type {import('gatsby').GatsbyConfig}
  */
@@ -6,5 +10,20 @@ module.exports = {
     siteUrl: "https://www.yourdomain.tld",
     title: "Food Truck Alley",
   },
-  plugins: [],
+  plugins: [
+    {
+      resolve: `gatsby-source-mongodb`,
+      options: {
+        connectionString: process.env.MONGODB_URI,
+        dbName: process.env.MONGODB_DB,
+        collection: [process.env.MONGODB_COLLECTION],
+        extraParams: {
+          ssl: true,
+          authSource: "admin",
+          retryWrites: true,
+          w: "majority"
+        }
+      }
+    },
+  ],
 };
