@@ -1,60 +1,78 @@
 import * as React from "react"
-import { Link } from "gatsby"
+import { useState } from "react"
+//import { Link } from "gatsby"
 import { graphql } from 'gatsby'
-import Layout from "../components/trucklayout"
+import TruckLayout from "../components/trucklayout"
+import TSearch from '../components/tsearch';
+import Map from '../components/map';
 
-//import { StaticImage } from "gatsby-plugin-image"
+// Placeholder food truck data (replace with GraphQL or API data)
+const initialFoodTrucks = [
+  {
+    id: 1,
+    name: 'Taco Haven',
+    mainLocation: { lat: 37.7749, lng: -122.4194, address: '123 Food Truck St, San Francisco, CA' },
+    eventLocation: null,
+    isAtEvent: false,
+    cuisine: 'Mexican',
+  },
+  {
+    id: 2,
+    name: 'Burger Wheels',
+    mainLocation: { lat: 37.7849, lng: -122.4094, address: '456 Taco Ave, San Francisco, CA' },
+    eventLocation: { lat: 37.7949, lng: -122.3994, address: '789 Event Plaza, San Francisco, CA' },
+    isAtEvent: true,
+    cuisine: 'American',
+  },
+];
 
-//import Layout from "../components/layout"
-//import { Seo } from "../components/seo"
+const IndexPage = () => {
+  const [filteredTrucks, setFilteredTrucks] = useState(initialFoodTrucks);
+  const [searchLocation, setSearchLocation] = useState(null);
+  const [travelPath, setTravelPath] = useState(null);
 
-const IndexPage = ({ data }) => {
   return (
-    <Layout pageTitle="Food Truck Alley">
-      <main>
-        <div className="row px-3">
-        {
-          data.allMongodbFoodtruckalleyFoodTrucks.nodes.map((node) => (
-
-              <div className="col-md-4">
-                <div className="card w-85" key={node.id}>
-                  <img src={node.images} className="card-img-top" alt={node.name} />
-                  <div className="card-body">
-                    <h3 className="card-title"><Link to={`/profile/${node.slug}`}>{node.title}</Link></h3>
-                    <h4 className="card-text">Status: {node.status}</h4>
-                    <p className="card-text">Hours: {node.hours}</p>
-                    <p className="card-text">Phone: {node.phone}</p>
-                    <p className="card-text">Location: {node.location}</p>
-                  </div>
-                </div>
-              </div>
-          ))
-        }
-        </div>
-
-      </main>
-    </Layout>
-  )
-}
+    <TruckLayout>
+      <div className="col-md-3">
+        <TSearch
+          foodTrucks={initialFoodTrucks}
+          setFilteredTrucks={setFilteredTrucks}
+          setSearchLocation={setSearchLocation}
+          setTravelPath={setTravelPath}
+        />
+      </div>
+      <div className="col-md-9">
+        <Map foodTrucks={filteredTrucks} travelPath={travelPath} searchLocation={searchLocation} />
+      </div>
+    </TruckLayout>
+  );
+};
 
 export const query = graphql`
   query {
     allMongodbFoodtruckalleyFoodTrucks {
       nodes {
+        id
+        truck_id
         name
-        hours
-        phone
         cuisine
-        location
         status
-        images{
-          alt
-          url
-        }
+        hours
+        mainLocation { lat lng address }
+        eventLocation { lat lng address }
+        isAtEvent
+        menu
+        phone
+        email
+        socials { facebook twitter instagram }
+        attending_events
+        images { url alt }
+        last_updated
       }
     }
   }
 `
+
 export const Head = () => <title>Food Truck Alley</title>
 
-export default IndexPage
+export default IndexPage;
