@@ -1,48 +1,60 @@
-exports.createSchemaCustomization = ({ actions }) => {
+exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   const { createTypes } = actions;
+
   const typeDefs = `
-    type mongodbFoodtruckalleyFood_trucks implements Node {
-      _id: ID!
-      truck_id: String!
+    type MongodbFoodtruckalleyFoodTrucks implements Node {
+      id: ID!
+      truck_id: String
       name: String!
-      cuisine: [String!]!
-      status: String!
-      hours: String!
-      mainLocation: mongodbFoodtruckalleyFood_trucksMainLocation!
-      eventLocation: mongodbFoodtruckalleyFood_trucksEventLocation
-      isAtEvent: Boolean!
-      menu: [String!]!
-      phone: String!
-      email: String!
-      socials: mongodbFoodtruckalleyFood_trucksSocials!
-      attending_events: [ID!]!
-      images: [mongodbFoodtruckalleyFood_trucksImages!]!
-      last_updated: String!
-      address: String!
+      cuisine: [String!]
+      status: String
+      hours: String
+      mainLocation: MongodbFoodtruckalleyFoodTrucksMainLocation
+      eventLocation: MongodbFoodtruckalleyFoodTrucksEventLocation
+      isAtEvent: Boolean
+      menu: [MongodbFoodtruckalleyFoodTrucksMenuItem!]!
+      phone: String
+      email: String
+      socials: MongodbFoodtruckalleyFoodTrucksSocials
+      attending_events: MongodbFoodtruckalleyFoodTrucksEvents
+      images: [MongodbFoodtruckalleyFoodTrucksImages!]
+      last_updated: String
     }
 
-    type mongodbFoodtruckalleyFood_trucksMainLocation {
-      lat: Float!
-      lng: Float!
-      address: String!
-    }
-
-    type mongodbFoodtruckalleyFood_trucksEventLocation {
+    type MongodbFoodtruckalleyFoodTrucksMainLocation {
       lat: Float
       lng: Float
       address: String
     }
 
-    type mongodbFoodtruckalleyFood_trucksSocials {
+    type MongodbFoodtruckalleyFoodTrucksEventLocation {
+      lat: Float
+      lng: Float
+      address: String
+    }
+
+    type MongodbFoodtruckalleyFoodTrucksSocials {
       facebook: String
       twitter: String
       instagram: String
     }
 
-    type mongodbFoodtruckalleyFood_trucksImages {
-      url: String!
-      alt: String!
+    type MongodbFoodtruckalleyFoodTrucksEvents {
+      Event: [String!]!
+    }
+
+    type MongodbFoodtruckalleyFoodTrucksImages {
+      url: String
+      alt: String
+    }
+
+    type MongodbFoodtruckalleyFoodTrucksMenuItem {
+      item: String!
+      price: Float!
+      dietary: [String!]!
+      description: String!
     }
   `;
+
   createTypes(typeDefs);
 };

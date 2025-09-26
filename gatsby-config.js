@@ -17,6 +17,10 @@ module.exports = {
         connectionString: process.env.MONGODB_URI,
         dbName: process.env.MONGODB_DB,
         collection: [process.env.MONGODB_COLLECTION],
+        extraFields: {
+          'food_trucks.socials': 'MongodbFoodtruckalleyFoodTrucksSocials',
+          'food_trucks.attending_events': 'MongodbFoodtruckalleyFoodTrucksEvents'
+        },
         extraParams: {
           ssl: true,
           authSource: "admin",

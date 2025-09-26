@@ -3,9 +3,9 @@ import { Link } from 'gatsby'
 
 const Navbar = ({ pageTitle, children }) => {
   return (
-    <div>
-      <nav className="bg-body-tertiary border-bottom">
-        <div className="container d-flex flex-wrap">
+    <nav className="border-bottom">
+      <div className="row bg-success-subtle">
+        <div className="container d-flex flex-wrap border-bottom">
           <ul className="nav me-auto">
             <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">Home</Link></li>
             <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">Features</Link></li>
@@ -14,18 +14,20 @@ const Navbar = ({ pageTitle, children }) => {
             <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">About</Link></li>
           </ul>
           <ul className="nav">
-            <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">Login</Link></li>
-            <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">Sign up</Link></li>
-          </ul>
+          <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">Login</Link></li>
+          <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">Sign up</Link></li>
+        </ul>
         </div>
-      </nav>
-      <header className="border-bottom">
-        <div className="row">
-          <div className="col-md-5"><p className="px-3 mt-3">Logo Here</p></div>
-          <div className="col-md-7"><h1 className="mt-2 text-align-center">Food Truck Alley</h1></div>
+      </div>
+      <div className="row bg-success text-light">
+        <div className="col-md-5">
+          <p className="px-3 mt-3">Logo Here</p>
         </div>
-      </header>
-    </div>
+        <div className="col-md-7">
+          <h1 className="mt-2 text-align-center">Food Truck Alley</h1>
+        </div>
+      </div>
+    </nav>
   )
 }
 
