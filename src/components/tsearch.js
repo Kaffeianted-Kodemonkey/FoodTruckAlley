@@ -41,8 +41,12 @@ const TSearch = ({ foodTrucks, setFilteredTrucks, setSearchLocation, setTravelPa
     });
   };
 
-  // Handle current location search
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const handleCurrentLocation = () => {
+    setIsLoading(true);
+    setError(null);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -50,9 +54,8 @@ const TSearch = ({ foodTrucks, setFilteredTrucks, setSearchLocation, setTravelPa
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           };
+          console.log('Geolocation success:', searchCoords); // Log coordinates
           setSearchLocation(searchCoords);
-
-          // Filter trucks by proximity (50 miles), no cuisine/dietary filters
           const filtered = foodTrucks.filter((truck) => {
             const truckCoords = truck.isAtEvent ? truck.eventLocation : truck.mainLocation;
             if (!truckCoords || !truckCoords.lat || !truckCoords.lng) {
@@ -65,19 +68,26 @@ const TSearch = ({ foodTrucks, setFilteredTrucks, setSearchLocation, setTravelPa
             });
             return distance <= 50;
           });
-
           console.log('Current location filtered trucks:', filtered);
           setFilteredTrucks(filtered);
           setTravelPath(null);
+          setIsLoading(false);
+          if (filtered.length === 0) {
+            setError('No food trucks found within 50 miles of your location.');
+          }
         },
-        () => {
-          console.log('Geolocation not available');
+        (err) => {
+          console.log('Geolocation error:', err.code, err.message); // Log error code
+          setError('Unable to access your location. Please allow location access or try a manual search.');
           setFilteredTrucks(foodTrucks);
+          setIsLoading(false);
         }
       );
     } else {
       console.log('Geolocation not supported');
+      setError('Geolocation is not supported by your browser.');
       setFilteredTrucks(foodTrucks);
+      setIsLoading(false);
     }
   };
 
@@ -190,15 +200,29 @@ const TSearch = ({ foodTrucks, setFilteredTrucks, setSearchLocation, setTravelPa
   return (
     <div className="sidebar bg-light p-3 h-100">
       <h3 className="mb-4">Find Food Trucks</h3>
-      {/* 1. Current Location Button */}
+      {/* Display error message if any */}
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
+      {/* Current Location Button */}
       <button
         type="button"
         className="btn btn-primary w-100 mb-4"
         onClick={handleCurrentLocation}
+        disabled={isLoading}
       >
-        Find Trucks at My Location
+        {isLoading ? (
+          <>
+            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Finding Trucks...
+          </>
+        ) : (
+          'Find Trucks Nearby'
+        )}
       </button>
-      {/* 2. Main Search Form (Truck Name, Location, Filters) */}
+      {/* Main Search Form (Truck Name, Location, Filters) */}
       <form onSubmit={handleMainSearch}>
         <div className="mb-3">
           <label htmlFor="truckName" className="form-label fw-bold">
@@ -218,17 +242,18 @@ const TSearch = ({ foodTrucks, setFilteredTrucks, setSearchLocation, setTravelPa
         </div>
         <div className="mb-3">
           <label htmlFor="location" className="form-label fw-bold">
-            Location (City, State, Zip, or Place)
+            Location:
           </label>
           <input
             type="text"
             className="form-control"
             id="location"
-            placeholder="e.g., Jensen, UT or St. Peter's Basilica"
+            placeholder="e.g., City, State, Zip, Place (Lon)"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           />
         </div>
+        <hr />
         <h5 className="mb-2">Dietary Filters</h5>
         <div className="row">
           <div className="col-md-6">
@@ -290,8 +315,8 @@ const TSearch = ({ foodTrucks, setFilteredTrucks, setSearchLocation, setTravelPa
         </button>
       </form>
       <hr className="my-4" />
-      {/* 3. Route Search Form */}
-      <h3 className="mb-4">Find Trucks Along a Route</h3>
+      {/* Route Search Form */}
+      <h3 className="mb-4">Find Truck Along Route</h3>
       <form onSubmit={handleRouteSubmit}>
         <div className="mb-3">
           <label htmlFor="origin" className="form-label fw-bold">
