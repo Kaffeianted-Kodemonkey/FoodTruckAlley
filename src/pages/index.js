@@ -45,8 +45,8 @@ const Homepage = ({ data }) => {
 
   return (
     <TLayout>
-      <div className="d-flex flex-column vh-100 overflow-hidden">
-        <div className="flex-grow-1 d-flex overflow-hidden">
+      <div className="bg-success-subtle d-flex flex-column vh-100 overflow-hidden">
+        <div className="flex-grow-1 d-flex">
 
           {/* LEFT: SEARCH */}
           <div className="col-md-3 bg-white border-end d-flex flex-column" style={{ height: '100%' }}>
@@ -60,8 +60,8 @@ const Homepage = ({ data }) => {
           </div>
 
           {/* RIGHT: MAP + RESULTS */}
-          <div className="col-md-9 d-flex flex-column" style={{ height: '100%' }}>
-            <div className="flex-grow-1" style={{ minHeight: 0 }}>
+          <div className="col-md-9 bg-success-subtle d-flex flex-column" style={{ height: '100%' }}>
+            <div className="img-thumbnail mt-3 mx-3 p-3 flex-grow-1" style={{ minHeight: 50 }}>
               <Map
                 filteredTrucks={filteredTrucks}
                 searchLocation={searchLocation}
@@ -69,26 +69,14 @@ const Homepage = ({ data }) => {
               />
             </div>
 
-            <div className="bg-light border-top" style={{ height: '40%', overflowY: 'auto' }}>
+            <div className=" border-top" style={{ height: '50%', overflowY: 'auto' }}>
               <div className="container-fluid px-3 py-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="text-primary fw-bold mb-0">
+                  <h2 className="text-success fs-1 fw-bold mb-1">
                     {filteredTrucks.length === foodTrucks.length
                       ? 'Featured Trucks'
                       : `Search Results (${filteredTrucks.length})`}
-                  </h5>
-                  {filteredTrucks.length !== foodTrucks.length && (
-                    <button
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() => {
-                        setFilteredTrucks(foodTrucks);
-                        setSearchLocation(null);
-                        setTravelPath(null);
-                      }}
-                    >
-                      Clear
-                    </button>
-                  )}
+                  </h2>
                 </div>
 
                 {displayTrucks.length === 0 ? (
@@ -99,7 +87,7 @@ const Homepage = ({ data }) => {
                     </p>
                   </div>
                 ) : (
-                  <FeaturedTrucks trucks={displayTrucks} limit={6} />
+                  <FeaturedTrucks trucks={displayTrucks} limit={12} />
                 )}
               </div>
             </div>

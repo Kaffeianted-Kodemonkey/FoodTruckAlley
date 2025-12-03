@@ -1,7 +1,8 @@
 /* src/styles/custom.css */
 html, body, #___gatsby, #gatsby-focus-wrapper {
   height: 100%;
-  overflow: hidden;
+  /*overflow: hidden;*/
+  overflow-x: hidden;
 }
 .vh-100 { height: 100vh !important; }
 

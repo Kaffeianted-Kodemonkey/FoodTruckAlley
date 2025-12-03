@@ -17,9 +17,6 @@ const TruckCard = memo(({ truck }) => {
           className="card-img-top"
           style={{ height: '240px', objectFit: 'cover' }}
           loading="lazy"
-          onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/400x250/f8f9fa/6c757d?text=No+Image';
-          }}
         />
         <div className="position-absolute top-0 end-0 m-2">
           <span
@@ -37,7 +34,7 @@ const TruckCard = memo(({ truck }) => {
           <p className="card-text small text-muted mb-2 text-truncate">
             {truck.cuisine?.join(' • ') || 'Various'}
           </p>
-          <div className="btn-group mt-auto">
+          <div className="col-6 btn-group mt-auto">
             <Link to={`/truck/${truck.truck_id || truck.id}`} className="btn btn-sm btn-success">
               View Map
             </Link>
@@ -53,7 +50,7 @@ const TruckCard = memo(({ truck }) => {
 
 TruckCard.displayName = 'TruckCard';
 
-const FeaturedTrucks = ({ trucks = [], limit = 6 }) => {
+const FeaturedTrucks = ({ trucks = [], limit = 12 }) => {
   const display = trucks.slice(0, limit);
 
   if (!display.length) {
