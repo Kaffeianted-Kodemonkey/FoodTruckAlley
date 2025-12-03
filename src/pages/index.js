@@ -1,105 +1,109 @@
+// pages/index.js
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { graphql } from 'gatsby';
-import TSearch from '../components/tsearch';
-import TLayout from '../components/trucklayout';
-import Map from '../components/map';
-import { Link } from 'gatsby';
 
-// Function to randomly select n items from an array
-const getRandomTrucks = (array, n) => {
-  if (!array || array.length === 0) return [];
-  const shuffled = [...array].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, Math.min(n, array.length));
-};
+import FoodTruckSearch from '../components/FoodTruckSearch';
+import FeaturedTrucks from '../components/FeaturedTrucks';
+import Map from '../components/Map';
+import TLayout from '../components/trucklayout';
 
 const Homepage = ({ data }) => {
   const foodTrucks = data?.allMongodbFoodtruckalleyFoodTrucks?.nodes || [];
+
+  // === STATE ===
   const [filteredTrucks, setFilteredTrucks] = useState(foodTrucks);
   const [searchLocation, setSearchLocation] = useState(null);
   const [travelPath, setTravelPath] = useState(null);
 
-  // Select 3 random trucks for featured section
-  const featuredTrucks = getRandomTrucks(foodTrucks, 3);
+  // === MEMOIZED FEATURED (ONCE) ===
+  const initialFeatured = useMemo(() => {
+    return [...foodTrucks].sort(() => 0.5 - Math.random()).slice(0, 6);
+  }, [foodTrucks]);
 
-  console.log('Food trucks:', foodTrucks);
-  console.log('Filtered trucks:', filteredTrucks);
-  console.log('Search location:', searchLocation);
-  console.log('Featured trucks:', featuredTrucks);
+  // === STABLE CALLBACK ===
+  const handleFilterChange = useCallback((trucks, loc, path) => {
+    setFilteredTrucks(trucks);
+    setSearchLocation(loc);
+    setTravelPath(path);
+  }, []);
+
+  // === STABLE DISPLAY TRUCKS (NO RECALCULATION) ===
+  const displayTrucksRef = useRef(initialFeatured);
+  const isFilteredRef = useRef(false);
+
+  // Only update when filter actually changes
+  if (filteredTrucks.length !== foodTrucks.length) {
+    displayTrucksRef.current = filteredTrucks;
+    isFilteredRef.current = true;
+  } else if (isFilteredRef.current) {
+    displayTrucksRef.current = initialFeatured;
+    isFilteredRef.current = false;
+  }
+
+  const displayTrucks = displayTrucksRef.current;
 
   return (
     <TLayout>
-      <div className="row">
-        <div className="col-md-3">
-          <TSearch
-            foodTrucks={foodTrucks}
-            setFilteredTrucks={setFilteredTrucks}
-            setSearchLocation={setSearchLocation}
-            setTravelPath={setTravelPath}
-          />
-        </div>
-        <div className="col-md-9">
-          <Map
-            filteredTrucks={filteredTrucks}
-            searchLocation={searchLocation}
-            travelPath={travelPath}
-            key={JSON.stringify(searchLocation)} // Force map re-render on location change
-          />
+      <div className="d-flex flex-column vh-100 overflow-hidden">
+        <div className="flex-grow-1 d-flex overflow-hidden">
 
-          <hr />
-
-          <h3 className="mb-4">Featured Food Trucks</h3>
-          {foodTrucks.length === 0 ? (
-            <div className="alert alert-warning" role="alert">
-              No food trucks available. Please check your database connection.
+          {/* LEFT: SEARCH */}
+          <div className="col-md-3 bg-white border-end d-flex flex-column" style={{ height: '100%' }}>
+            <div className="p-4 flex-grow-1 overflow-auto">
+              <h4 className="text-primary fw-bold mb-4">Find Food Trucks</h4>
+              <FoodTruckSearch
+                foodTrucks={foodTrucks}
+                onFilterChange={handleFilterChange}
+              />
             </div>
-          ) : (
-            <div className="row">
-              {featuredTrucks.map((truck) => {
-                // Validate image URL
-                const validImageUrl =
-                  truck.images &&
-                  truck.images[0]?.url &&
-                  /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(truck.images[0].url)
-                    ? truck.images[0].url
-                    : 'https://via.placeholder.com/150';
-                const validAltText =
-                  truck.images && truck.images[0]?.alt ? truck.images[0].alt : truck.name || 'Food Truck';
+          </div>
 
-                // Log image issues
-                console.log(`Image for ${truck.name || 'Unnamed Truck'}:`, {
-                  url: truck.images?.[0]?.url,
-                  valid: /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(truck.images?.[0]?.url),
-                  used: validImageUrl,
-                });
+          {/* RIGHT: MAP + RESULTS */}
+          <div className="col-md-9 d-flex flex-column" style={{ height: '100%' }}>
+            <div className="flex-grow-1" style={{ minHeight: 0 }}>
+              <Map
+                filteredTrucks={filteredTrucks}
+                searchLocation={searchLocation}
+                travelPath={travelPath}
+              />
+            </div>
 
-                return (
-                  <div key={truck.truck_id || truck.id} className="col-4 mb-4">
-                    <div className="card" style={{ width: '18rem', height: '20rem' }}>
-                      <img
-                        src={validImageUrl}
-                        className="card-img-top"
-                        alt={validAltText}
-                        style={{ height: '10rem', objectFit: 'cover' }}
-                      />
-                      <div className="card-body d-flex flex-column">
-                        <h5 className="card-title">{truck.name || 'Unnamed Truck'}</h5>
-                        <p className="card-text">
-                          {truck.cuisine?.length > 0 ? truck.cuisine.join(', ') : 'No cuisine specified'}
-                        </p>
-                        <Link
-                          to={`/truck/${truck.truck_id || truck.id}`}
-                          className="btn btn-primary mt-auto"
-                        >
-                          View Details
-                        </Link>
-                      </div>
-                    </div>
+            <div className="bg-light border-top" style={{ height: '40%', overflowY: 'auto' }}>
+              <div className="container-fluid px-3 py-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h5 className="text-primary fw-bold mb-0">
+                    {filteredTrucks.length === foodTrucks.length
+                      ? 'Featured Trucks'
+                      : `Search Results (${filteredTrucks.length})`}
+                  </h5>
+                  {filteredTrucks.length !== foodTrucks.length && (
+                    <button
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() => {
+                        setFilteredTrucks(foodTrucks);
+                        setSearchLocation(null);
+                        setTravelPath(null);
+                      }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                {displayTrucks.length === 0 ? (
+                  <div className="text-center py-5">
+                    <p className="text-muted mb-0">
+                      <strong>No trucks match your search.</strong><br />
+                      Try adjusting filters.
+                    </p>
                   </div>
-                );
-              })}
+                ) : (
+                  <FeaturedTrucks trucks={displayTrucks} limit={6} />
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </TLayout>
@@ -108,34 +112,18 @@ const Homepage = ({ data }) => {
 
 export const query = graphql`
   query {
-    allMongodbFoodtruckalleyFood_Trucks {
+    allMongodbFoodtruckalleyFoodTrucks {
       nodes {
         id
         truck_id
         name
         cuisine
         status
-        hours
-        mainLocation { address, lat, lng }
-        eventLocation { address, lat, lng }
-        isAtEvent
-        menu {
-          item
-          price
-          dietary
-          description
-        }
-        phone
-        email
         images { url alt }
-        socials {
-          facebook
-          instagram
-          twitter
-        }
-        website
-        description
-        last_updated
+        mainLocation { lat lng address }
+        eventLocation { lat lng address }
+        isAtEvent
+        menu { dietary }
       }
     }
   }

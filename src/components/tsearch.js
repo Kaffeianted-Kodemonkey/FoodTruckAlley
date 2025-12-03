@@ -142,13 +142,9 @@ const TSearch = ({ foodTrucks, setFilteredTrucks, setSearchLocation, setTravelPa
   return (
     <div className="sidebar bg-light p-3 h-100">
       <h3 className="mb-4">Find Food Trucks</h3>
-      <LocationSearch
-        foodTrucks={foodTrucks}
-        setFilteredTrucks={setFilteredTrucks}
-        setSearchLocation={setSearchLocation}
-        haversineDistance={haversineDistance}
-      />
+
       <hr className="my-4" />
+      
       <div className="mb-3">
         <label htmlFor="location" className="form-label fw-bold">
           Location:
@@ -167,8 +163,16 @@ const TSearch = ({ foodTrucks, setFilteredTrucks, setSearchLocation, setTravelPa
           {searchError}
         </div>
       )}
-      <hr className="my-4" />
+
+
       <Filter foodTrucks={foodTrucks} setFilteredTrucks={setFilteredTrucks} />
+      <br />
+      <LocationSearch
+        foodTrucks={foodTrucks}
+        setFilteredTrucks={setFilteredTrucks}
+        setSearchLocation={setSearchLocation}
+        haversineDistance={haversineDistance}
+      />
       <hr className="my-4" />
       <h3 className="mb-4">Find Truck Along Route</h3>
       <form onSubmit={handleRouteSubmit}>

@@ -43,7 +43,7 @@ const TruckPage = ({ data }) => {
   });
 
   return (
-    <TLayout>      
+    <TLayout>
       {/* Banner Image */}
       <div className="row border-bottom">
         <div className="col-12 p-0">
@@ -229,32 +229,22 @@ const TruckPage = ({ data }) => {
 };
 
 export const query = graphql`
-  query($truck_id: String!) {
-    mongodbFoodtruckalleyFoodTrucks(truck_id: { eq: $truck_id }) {
+query {
+  allMongodbFoodtruckalleyFoodTrucks {
+    nodes {
       id
       truck_id
       name
       cuisine
       status
-      hours
-      mainLocation { address, lat, lng }
-      eventLocation { address, lat, lng }
+      mainLocation { lat lng }
+      eventLocation { lat lng }
       isAtEvent
-      menu {
-        item
-        price
-        dietary
-        description
-      }
-      phone
-      email
+      menu { dietary }
       images { url alt }
-      socials { platform url }
-      website
-      description
-      last_updated
     }
   }
+}
 `;
 
 export default TruckPage;

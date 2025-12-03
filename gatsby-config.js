@@ -1,4 +1,3 @@
-
 require("dotenv").config({
   path: `.env`,
 })
@@ -11,6 +10,9 @@ module.exports = {
     title: "Food Truck Alley",
   },
   plugins: [
+    'gatsby-plugin-image',
+    'gatsby-plugin-sharp',
+    'gatsby-transformer-sharp',
     {
       resolve: `gatsby-source-mongodb`,
       options: {

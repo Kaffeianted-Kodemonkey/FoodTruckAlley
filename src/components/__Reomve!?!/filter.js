@@ -72,7 +72,6 @@ const Filter = ({ foodTrucks, setFilteredTrucks }) => {
 
   return (
     <div className="filter-section">
-      <h3 className="mb-4">Filter Food Trucks</h3>
       <form>
         <div className="mb-3">
           <label htmlFor="truckName" className="form-label fw-bold">
