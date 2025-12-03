@@ -29,82 +29,77 @@ const Homepage = ({ data }) => {
 
   return (
     <TLayout>
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-md-3">
-            <TSearch
-              foodTrucks={foodTrucks}
-              setFilteredTrucks={setFilteredTrucks}
-              setSearchLocation={setSearchLocation}
-              setTravelPath={setTravelPath}
-            />
-          </div>
-          <div className="col-md-9">
-            <div className="row">
-              <div className="col-12">
-                <Map
-                  filteredTrucks={filteredTrucks}
-                  searchLocation={searchLocation}
-                  travelPath={travelPath}
-                />
-              </div>
+      <div className="row">
+        <div className="col-md-3">
+          <TSearch
+            foodTrucks={foodTrucks}
+            setFilteredTrucks={setFilteredTrucks}
+            setSearchLocation={setSearchLocation}
+            setTravelPath={setTravelPath}
+          />
+        </div>
+        <div className="col-md-9">
+          <Map
+            filteredTrucks={filteredTrucks}
+            searchLocation={searchLocation}
+            travelPath={travelPath}
+            key={JSON.stringify(searchLocation)} // Force map re-render on location change
+          />
+
+          <hr />
+
+          <h3 className="mb-4">Featured Food Trucks</h3>
+          {foodTrucks.length === 0 ? (
+            <div className="alert alert-warning" role="alert">
+              No food trucks available. Please check your database connection.
             </div>
+          ) : (
+            <div className="row">
+              {featuredTrucks.map((truck) => {
+                // Validate image URL
+                const validImageUrl =
+                  truck.images &&
+                  truck.images[0]?.url &&
+                  /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(truck.images[0].url)
+                    ? truck.images[0].url
+                    : 'https://via.placeholder.com/150';
+                const validAltText =
+                  truck.images && truck.images[0]?.alt ? truck.images[0].alt : truck.name || 'Food Truck';
 
-            <hr />
+                // Log image issues
+                console.log(`Image for ${truck.name || 'Unnamed Truck'}:`, {
+                  url: truck.images?.[0]?.url,
+                  valid: /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(truck.images?.[0]?.url),
+                  used: validImageUrl,
+                });
 
-            <h3 className="mb-4">Featured Food Trucks</h3>
-            {foodTrucks.length === 0 ? (
-              <div className="alert alert-warning" role="alert">
-                No food trucks available. Please check your database connection.
-              </div>
-            ) : (
-              <div className="row">
-                {featuredTrucks.map((truck) => {
-                  // Validate image URL
-                  const validImageUrl =
-                    truck.images &&
-                    truck.images[0]?.url &&
-                    /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(truck.images[0].url)
-                      ? truck.images[0].url
-                      : 'https://via.placeholder.com/150';
-                  const validAltText =
-                    truck.images && truck.images[0]?.alt ? truck.images[0].alt : truck.name || 'Food Truck';
-
-                  // Log image issues
-                  console.log(`Image for ${truck.name || 'Unnamed Truck'}:`, {
-                    url: truck.images?.[0]?.url,
-                    valid: /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(truck.images?.[0]?.url),
-                    used: validImageUrl,
-                  });
-
-                  return (
-                    <div key={truck.truck_id || truck.id} className="col-4 mb-4">
-                      <div className="card" style={{ width: '18rem', height: '23rem' }}>
-                        <img
-                          src={validImageUrl}
-                          className="card-img-top"
-                          alt={validAltText}
-                          style={{ height: '10rem', objectFit: 'cover' }}
-                        />
-                        <div className="card-body d-flex flex-column">
-                          <h5 className="card-title">{truck.name || 'Unnamed Truck'}</h5>
-                          <p className="card-text">
-                            {truck.cuisine?.length > 0 ? truck.cuisine.join(', ') : 'No cuisine specified'}
-                          </p>
-                          <Link
-                            to={`/truck/${truck.truck_id || truck.id}`}
-                            className="btn btn-primary mt-auto"
-                          >
-                            View Details
-                          </Link>
-                        </div>
+                return (
+                  <div key={truck.truck_id || truck.id} className="col-4 mb-4">
+                    <div className="card" style={{ width: '18rem', height: '20rem' }}>
+                      <img
+                        src={validImageUrl}
+                        className="card-img-top"
+                        alt={validAltText}
+                        style={{ height: '10rem', objectFit: 'cover' }}
+                      />
+                      <div className="card-body d-flex flex-column">
+                        <h5 className="card-title">{truck.name || 'Unnamed Truck'}</h5>
+                        <p className="card-text">
+                          {truck.cuisine?.length > 0 ? truck.cuisine.join(', ') : 'No cuisine specified'}
+                        </p>
+                        <Link
+                          to={`/truck/${truck.truck_id || truck.id}`}
+                          className="btn btn-primary mt-auto"
+                        >
+                          View Details
+                        </Link>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </TLayout>
@@ -113,7 +108,7 @@ const Homepage = ({ data }) => {
 
 export const query = graphql`
   query {
-    allMongodbFoodtruckalleyFoodTrucks {
+    allMongodbFoodtruckalleyFood_Trucks {
       nodes {
         id
         truck_id
@@ -121,8 +116,8 @@ export const query = graphql`
         cuisine
         status
         hours
-        mainLocation { lat lng address }
-        eventLocation { lat lng address }
+        mainLocation { address, lat, lng }
+        eventLocation { address, lat, lng }
         isAtEvent
         menu {
           item
@@ -133,6 +128,13 @@ export const query = graphql`
         phone
         email
         images { url alt }
+        socials {
+          facebook
+          instagram
+          twitter
+        }
+        website
+        description
         last_updated
       }
     }

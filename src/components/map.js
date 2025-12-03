@@ -73,7 +73,7 @@ const Map = ({ filteredTrucks, searchLocation, travelPath }) => {
           {mapError}
         </div>
       )}
-      <div ref={mapRef} style={{ height: '65vh', width: '100%' }} />
+      <div ref={mapRef} style={{ height: '60vh', width: '100%' }} />
     </div>
   );
 };

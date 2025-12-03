@@ -1,14 +1,14 @@
 import * as React from 'react'
 import { Link } from 'gatsby'
 
-const Navbar = ({ pageTitle, children }) => {
+const Navbar = ({ children }) => {
   return (
     <nav className="border-bottom">
       <div className="row bg-success-subtle">
         <div className="container d-flex flex-wrap border-bottom">
           <ul className="nav me-auto">
             <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">Home</Link></li>
-            <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">Features</Link></li>
+            <li className="nav-item"><Link to="/truck-dir" className="nav-link link-body-emphasis">Truck Directory</Link></li>
             <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">Pricing</Link></li>
             <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">FAQs</Link></li>
             <li className="nav-item"><Link to="/" className="nav-link link-body-emphasis">About</Link></li>

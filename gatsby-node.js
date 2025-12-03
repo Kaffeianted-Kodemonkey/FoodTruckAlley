@@ -59,7 +59,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   createTypes(typeDefs);
 };
 
-/*exports.createPages = async ({ graphql, actions }) => {
+exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions;
   const result = await graphql(`
     query {
@@ -84,4 +84,4 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       context: { truck_id: truck_id || id },
     });
   });
-};*/
+};
