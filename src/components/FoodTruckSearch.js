@@ -2,49 +2,96 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
 
+// Haversine distance in miles
 const haversineDistance = (c1, c2) => {
   const toRad = v => (v * Math.PI) / 180;
-  const R = 3958.8;
+  const R = 3958.8; // Earth radius in miles
   const dLat = toRad(c2.lat - c1.lat);
   const dLng = toRad(c2.lng - c1.lng);
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(c1.lat)) * Math.cos(toRad(c2.lat)) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-const FoodTruckSearch = ({ foodTrucks = [], onFilterChange }) => {
+const FoodTruckSearch = ({
+  foodTrucks = [],
+  cuisines = [],          // Array of { id, name, slug, description }
+  specialties = [],       // Array of { id, name, slug, description, category }
+  onFilterChange
+}) => {
   const [filteredTrucks, setFilteredTrucks] = useState(foodTrucks);
   const [searchLocation, setSearchLocation] = useState(null);
   const [travelPath, setTravelPath] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Search states
   const [truckName, setTruckName] = useState('');
   const [vegan, setVegan] = useState(false);
   const [gf, setGf] = useState(false);
-  const [cuisineFilters, setCuisineFilters] = useState([]);
+  const [selectedCuisines, setSelectedCuisines] = useState([]); // array of cuisine id strings
+  const [selectedSpecialties, setSelectedSpecialties] = useState([]); // array of specialty id strings
   const [locationInput, setLocationInput] = useState('');
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
-
-  const cuisines = ['Tacos', 'BBQ', 'Pizza', 'Burgers', 'Vegan', 'Sushi', 'Dessert', 'Seafood'];
+  const [maxDistanceMiles, setMaxDistanceMiles] = useState(50);
 
   const prev = useRef({ filteredTrucks: [], searchLocation: null, travelPath: null });
 
-  // === FILTER LOGIC ===
+  // Core filtering logic
   useEffect(() => {
     if (!Array.isArray(foodTrucks)) return;
 
     const filtered = foodTrucks.filter(truck => {
-      const name = !truckName || (truck.name && truck.name.toLowerCase().includes(truckName.toLowerCase()));
-      const cuisine = cuisineFilters.length === 0 || (truck.cuisine && cuisineFilters.some(c => truck.cuisine.includes(c)));
-      const v = !vegan || (truck.menu && truck.menu.some(m => m.dietary?.includes('Vegan')));
-      const g = !gf || (truck.menu && truck.menu.some(m => m.dietary?.includes('Gluten-Free')));
-      return name && cuisine && v && g;
+      // Name
+      const nameMatch = !truckName || (truck.name?.toLowerCase().includes(truckName.toLowerCase()));
+
+      // Cuisines
+      const cuisineMatch = selectedCuisines.length === 0 ||
+        (truck.cuisines || []).some(id => selectedCuisines.includes(id.toString()));
+
+      // Specialties
+      const specialtyMatch = selectedSpecialties.length === 0 ||
+        (truck.specialties || []).some(id => selectedSpecialties.includes(id.toString()));
+
+      // Dietary
+      const hasVegan = truck.menu?.some(m => m.dietary?.includes('Vegan')) ?? false;
+      const hasGf = truck.menu?.some(m => m.dietary?.includes('Gluten-Free')) ?? false;
+      const dietMatch = (!vegan || hasVegan) && (!gf || hasGf);
+
+      // Location / Distance
+      let locationMatch = true;
+      if (searchLocation && truck.location?.coordinates) {
+        const [lng, lat] = truck.location.coordinates;
+        const distance = haversineDistance(
+          { lat: searchLocation.lat, lng: searchLocation.lng },
+          { lat, lng }
+        );
+        locationMatch = distance <= maxDistanceMiles;
+      }
+
+      // Route proximity
+      if (travelPath?.path && truck.location?.coordinates) {
+        const [truckLng, truckLat] = truck.location.coordinates;
+        const nearRoute = travelPath.path.some(p =>
+          haversineDistance(
+            { lat: truckLat, lng: truckLng },
+            { lat: p.lat, lng: p.lng }
+          ) <= 5
+        );
+        locationMatch = nearRoute;
+      }
+
+      return nameMatch && cuisineMatch && specialtyMatch && dietMatch && locationMatch;
     });
 
     setFilteredTrucks(filtered);
-  }, [truckName, vegan, gf, cuisineFilters, foodTrucks]);
+  }, [
+    truckName, vegan, gf,
+    selectedCuisines, selectedSpecialties,
+    searchLocation, travelPath, maxDistanceMiles,
+    foodTrucks
+  ]);
 
-  // === CALL PARENT ONLY IF CHANGED ===
+  // Notify parent
   useEffect(() => {
     const changed =
       prev.current.filteredTrucks !== filteredTrucks ||
@@ -57,7 +104,7 @@ const FoodTruckSearch = ({ foodTrucks = [], onFilterChange }) => {
     }
   }, [filteredTrucks, searchLocation, travelPath, onFilterChange]);
 
-  // === NEAR ME ===
+  // Near Me
   const handleNearMe = () => {
     setIsLoading(true);
     if (!navigator.geolocation) {
@@ -78,54 +125,67 @@ const FoodTruckSearch = ({ foodTrucks = [], onFilterChange }) => {
     );
   };
 
-  // === LOCATION SEARCH ===
-  const handleLocationSearch = async e => {
+  // Location search
+  const handleLocationSearch = async (e) => {
     e.preventDefault();
     if (!locationInput.trim()) return;
     try {
       const google = await loadGoogleMaps();
       const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ address: locationInput }, (res, status) => {
-        if (status === 'OK') {
-          setSearchLocation({ lat: res[0].geometry.location.lat(), lng: res[0].geometry.location.lng() });
+      geocoder.geocode({ address: locationInput }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          const loc = results[0].geometry.location;
+          setSearchLocation({ lat: loc.lat(), lng: loc.lng() });
         }
       });
-    } catch {}
+    } catch (err) {
+      console.error("Geocode failed:", err);
+    }
   };
 
-  // === ROUTE SEARCH ===
-  const handleRouteSearch = async e => {
+  // Route search
+  const handleRouteSearch = async (e) => {
     e.preventDefault();
-    if (!origin || !destination) return;
+    if (!origin.trim() || !destination.trim()) return;
     try {
       const google = await loadGoogleMaps();
-      const ds = new google.maps.DirectionsService();
-      ds.route({ origin, destination, travelMode: 'DRIVING' }, (res, status) => {
-        if (status === 'OK') {
-          const path = res.routes[0].overview_path.map(p => ({ lat: p.lat(), lng: p.lng() }));
-          setTravelPath({ origin, destination, path });
+      const directionsService = new google.maps.DirectionsService();
+      directionsService.route(
+        { origin, destination, travelMode: google.maps.TravelMode.DRIVING },
+        (result, status) => {
+          if (status === 'OK') {
+            const path = result.routes[0].overview_path.map(p => ({
+              lat: p.lat(),
+              lng: p.lng()
+            }));
+            setTravelPath({ origin, destination, path });
+          }
         }
-      });
-    } catch {}
+      );
+    } catch (err) {
+      console.error("Route search failed:", err);
+    }
   };
 
-  // === RESET ===
+  // Reset
   const reset = () => {
     setTruckName('');
     setVegan(false);
     setGf(false);
-    setCuisineFilters([]);
+    setSelectedCuisines([]);
+    setSelectedSpecialties([]);
     setLocationInput('');
     setOrigin('');
     setDestination('');
     setSearchLocation(null);
     setTravelPath(null);
+    setMaxDistanceMiles(50);
     onFilterChange?.(foodTrucks, null, null);
   };
 
   return (
     <div className="p-3">
-      {/* 1. TRUCK NAME */}
+      {/* Truck Name */}
       <div className="mb-4">
         <label className="form-label fw-bold text-primary">Truck Name</label>
         <input
@@ -137,24 +197,42 @@ const FoodTruckSearch = ({ foodTrucks = [], onFilterChange }) => {
         />
       </div>
 
-      {/* 2. LOCATION */}
+      {/* Location Search */}
       <div className="mb-4">
         <label className="form-label fw-bold text-primary">Location</label>
         <form onSubmit={handleLocationSearch} className="d-flex gap-2 mb-3">
           <input
             type="text"
             className="form-control rounded-3 shadow-sm"
-            placeholder="City, State, ZIP"
+            placeholder="City, State, ZIP or Address"
             value={locationInput}
             onChange={e => setLocationInput(e.target.value)}
           />
+          <button type="submit" className="btn btn-outline-primary">
+            Go
+          </button>
         </form>
+
+        {searchLocation && (
+          <div className="mt-2">
+            <label className="form-label small fw-semibold">Search Radius: {maxDistanceMiles} miles</label>
+            <input
+              type="range"
+              className="form-range"
+              min="5"
+              max="200"
+              step="5"
+              value={maxDistanceMiles}
+              onChange={e => setMaxDistanceMiles(Number(e.target.value))}
+            />
+          </div>
+        )}
       </div>
 
-      {/* 3. FILTERS */}
+      {/* Dietary Options */}
       <div className="mb-4">
         <h6 className="fw-bold text-primary mb-3">Dietary Options</h6>
-        <div className="d-flex gap-3 flex-wrap">
+        <div className="d-flex gap-4 flex-wrap">
           <div className="form-check form-switch">
             <input className="form-check-input" type="checkbox" id="vegan" checked={vegan} onChange={e => setVegan(e.target.checked)} />
             <label className="form-check-label fw-semibold" htmlFor="vegan">Vegan</label>
@@ -166,27 +244,87 @@ const FoodTruckSearch = ({ foodTrucks = [], onFilterChange }) => {
         </div>
       </div>
 
-      <div className="mb-4">
+      {/* Cuisines */}
+      <div className="mb-5">
         <h6 className="fw-bold text-primary mb-3">Cuisine Type</h6>
-        <div className="d-flex flex-wrap gap-2">
-          {cuisines.map(c => (
-            <span
-              key={c}
-              className={`badge rounded-pill px-4 py-2 fs-6 cursor-pointer transition ${
-                cuisineFilters.includes(c) ? 'bg-primary text-white shadow-sm' : 'bg-light text-dark border'
-              }`}
-              onClick={() => setCuisineFilters(prev =>
-                prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]
-              )}
-              style={{ cursor: 'pointer' }}
-            >
-              {c}
-            </span>
-          ))}
-        </div>
+        {cuisines.length === 0 ? (
+          <p className="text-muted small">Loading cuisines...</p>
+        ) : (
+          <div className="d-flex flex-column gap-2">
+            <div className="row">
+              {cuisines.map((cuisine) => (
+                <div className="col-6">
+                  <div key={cuisine.id} className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id={`cuisine-${cuisine.id}`}
+                      value={cuisine.id}
+                      checked={selectedCuisines.includes(cuisine.id.toString())}
+                      onChange={(e) => {
+                        const idStr = cuisine.id.toString();
+                        setSelectedCuisines((prev) =>
+                          e.target.checked
+                            ? [...prev, idStr]
+                            : prev.filter((id) => id !== idStr)
+                        );
+                      }}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor={`cuisine-${cuisine.id}`}
+                    >
+                      {cuisine.name}
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* 4. SEARCH BUTTONS */}
+      {/* Specialties */}
+      <div className="mb-5">
+        <h6 className="fw-bold text-primary mb-3">Specialties (Desserts & Drinks)</h6>
+        {specialties.length === 0 ? (
+          <p className="text-muted small">Loading specialties...</p>
+        ) : (
+          <div className="d-flex flex-column gap-2">
+            <div className="row">
+              {specialties.map((specialty) => (
+                <div className="col-6">
+                  <div key={specialty.id} className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id={`specialty-${specialty.id}`}
+                      value={specialty.id}
+                      checked={selectedSpecialties.includes(specialty.id.toString())}
+                      onChange={(e) => {
+                        const idStr = specialty.id.toString();
+                        setSelectedCuisines((prev) =>
+                          e.target.checked
+                            ? [...prev, idStr]
+                            : prev.filter((id) => id !== idStr)
+                        );
+                      }}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor={`specialty-${specialty.id}`}
+                    >
+                      {specialty.name}
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Action Buttons */}
       <div className="row g-3 mb-4">
         <div className="col-6">
           <button
@@ -199,7 +337,6 @@ const FoodTruckSearch = ({ foodTrucks = [], onFilterChange }) => {
         </div>
         <div className="col-6">
           <button
-            type="submit"
             className="btn btn-outline-primary btn-lg w-100 rounded-3 shadow-sm"
             onClick={handleLocationSearch}
           >
@@ -210,7 +347,7 @@ const FoodTruckSearch = ({ foodTrucks = [], onFilterChange }) => {
 
       <hr className="my-4" />
 
-      {/* 5. ALONG ROUTE */}
+      {/* Along Route */}
       <div className="mb-4">
         <h6 className="fw-bold text-primary mb-3">Find Along Route</h6>
         <form onSubmit={handleRouteSearch}>
@@ -218,7 +355,7 @@ const FoodTruckSearch = ({ foodTrucks = [], onFilterChange }) => {
             <div className="col-6">
               <input
                 className="form-control rounded-3 shadow-sm"
-                placeholder="Start"
+                placeholder="Starting point"
                 value={origin}
                 onChange={e => setOrigin(e.target.value)}
               />
@@ -226,7 +363,7 @@ const FoodTruckSearch = ({ foodTrucks = [], onFilterChange }) => {
             <div className="col-6">
               <input
                 className="form-control rounded-3 shadow-sm"
-                placeholder="End"
+                placeholder="Destination"
                 value={destination}
                 onChange={e => setDestination(e.target.value)}
               />
@@ -238,7 +375,7 @@ const FoodTruckSearch = ({ foodTrucks = [], onFilterChange }) => {
         </form>
       </div>
 
-      {/* 6. CLEAR */}
+      {/* Reset */}
       <button className="btn btn-outline-secondary w-100 rounded-3 shadow-sm" onClick={reset}>
         Clear All Filters
       </button>

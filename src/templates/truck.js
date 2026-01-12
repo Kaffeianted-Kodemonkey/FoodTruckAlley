@@ -1,3 +1,4 @@
+// src/pages/truck.js
 import * as React from 'react';
 import { useState } from 'react';
 import { graphql } from 'gatsby';
@@ -5,7 +6,6 @@ import TLayout from '../components/trucklayout';
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 
 const TruckPage = ({ data }) => {
-  // Move useState to the top to comply with Rules of Hooks
   const [selectedMarker, setSelectedMarker] = useState(null);
 
   const truck = data.mongodbFoodtruckalleyFoodTrucks;
@@ -13,123 +13,87 @@ const TruckPage = ({ data }) => {
   if (!truck) {
     return (
       <TLayout>
-        <div className="alert alert-warning" role="alert">
+        <div className="alert alert-warning text-center py-5">
           Truck not found.
         </div>
       </TLayout>
     );
   }
 
-  const validImageUrl =
-    truck.images &&
-    truck.images[0]?.url &&
-    /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(truck.images[0].url)
-      ? truck.images[0].url
-      : `https://via.placeholder.com/150?text=${encodeURIComponent(truck.name || 'Food+Truck')}`;
-  const validAltText = truck.images && truck.images[0]?.alt ? truck.images[0].alt : truck.name || 'Food Truck';
+  const imageUrl = truck.images?.[0]?.url && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(truck.images[0].url)
+    ? truck.images[0].url
+    : 'https://via.placeholder.com/1200x400/f8f9fa/6c757d?text=' + encodeURIComponent(truck.name || 'Food Truck');
 
-  const location = truck.isAtEvent && truck.eventLocation ? truck.eventLocation : truck.mainLocation;
-  const mapCenter = location?.lat && location?.lng ? { lat: location.lat, lng: location.lng } : { lat: 40.4555, lng: -109.5287 };
+  const altText = truck.images?.[0]?.alt || truck.name || 'Food Truck';
 
-  console.log(`Truck page for ${truck.name}:`, {
-    image: validImageUrl,
-    status: truck.status,
-    menu: truck.menu,
-    hours: truck.hours,
-    location,
-    contact: { phone: truck.phone, email: truck.email, website: truck.website },
-    socials: truck.socials,
-    description: truck.description,
-  });
+  const mapCenter = truck.location?.coordinates
+    ? { lat: truck.location.coordinates[1], lng: truck.location.coordinates[0] }
+    : { lat: 40.4555, lng: -109.5287 };
+
+  const cuisineNames = truck.cuisines?.join(', ') || 'Various';
+  const specialtyNames = truck.specialties?.join(', ') || 'None';
 
   return (
     <TLayout>
       {/* Banner Image */}
-      <div className="row border-bottom">
+      <div className="row border-bottom mb-4">
         <div className="col-12 p-0">
           <img
-            src={validImageUrl}
-            alt={validAltText}
-            className="img-fluid w-100 shadow-sm"
-            style={{ maxHeight: '300px', objectFit: 'cover' }}
+            src={imageUrl}
+            alt={altText}
+            className="img-fluid w-100 shadow"
+            style={{ maxHeight: '350px', objectFit: 'cover' }}
             onError={(e) => {
-              console.log(`Image load error for ${truck.name}: ${validImageUrl}`);
-              e.target.src = `https://via.placeholder.com/150?text=${encodeURIComponent(truck.name || 'Food+Truck')}`;
+              e.target.src = 'https://via.placeholder.com/1200x400/f8f9fa/6c757d?text=' + encodeURIComponent(truck.name);
             }}
           />
         </div>
       </div>
 
-      {/* Food Truck Name */}
-      <div className="row border-bottom opacity-75 bg-black text-light fw-bold">
-        <div className="col-4 pt-4 text-center">
-          <h3><strong>Current Location</strong></h3>
-          <hr />
-          <p>Location: {truck.isAtEvent === 'false' ? truck.mainLocation['address'] : truck.eventLocation['address']}</p>
-          <p>Hours: {truck.hours}</p>
-        </div>
-        {/* Status */}
-        <div className="col-4 mt-4 text-center">
-          <p className="fs-1"><strong>{truck.name}</strong></p>
-
-          <p>
-            <span className={`badge ${truck.status === 'Open' ? 'bg-success' : 'bg-danger'} fs-3`}>
-              {truck.status || 'Status Unknown'}
+      {/* Header */}
+      <div className="row mb-4 bg-dark text-white rounded-3 p-4 shadow">
+        <div className="col-md-8">
+          <h1 className="display-4 fw-bold mb-2">{truck.name}</h1>
+          <div className="d-flex flex-wrap gap-3 mb-3">
+            <span className={`badge fs-4 px-4 py-2 ${truck.status === 'Open' ? 'bg-success' : 'bg-danger'}`}>
+              {truck.status || 'Unknown'}
             </span>
-          </p>
+            <span className="badge bg-primary fs-5 px-3 py-2">
+              {cuisineNames}
+            </span>
+            {specialtyNames !== 'None' && (
+              <span className="badge bg-info fs-5 px-3 py-2">
+                {specialtyNames}
+              </span>
+            )}
+          </div>
+          <p className="lead mb-1">{truck.address || 'Location not specified'}</p>
         </div>
-
-        <div className="col-4 text-center mt-4">
-          <h3><strong>Review Ratings</strong></h3>
-          <hr />
+        <div className="col-md-4 text-md-end mt-3 mt-md-0">
+          <h4>Contact</h4>
+          {truck.phone && <p className="mb-1">📞 {truck.phone}</p>}
+          {truck.email && <p className="mb-1">✉️ {truck.email}</p>}
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="row opacity-75 bg-success text-light fw-bold">
-        <div className="col-12 py-3">
-          <h3 className="mb-1 text-center fs-1">Menu</h3>
-          <p className="text-center mb-0">
-            {truck.cuisine && truck.cuisine.length > 0
-              ? truck.cuisine.join(' - ')
-              : 'No cuisines specified'}
-          </p>
-        </div>
-      </div>
-
-      <div className="row border-bottom opacity-75 bg-success text-light fw-bold pt-3">
-        {/* Center Column: Menu */}
-        <div className="col-md-8">
-          {truck.menu && truck.menu.length > 0 ? (
-            <div className="row">
+      <div className="row g-4">
+        {/* Menu */}
+        <div className="col-lg-8">
+          <h3 className="fw-bold mb-4 text-success">Menu</h3>
+          {truck.menu?.length > 0 ? (
+            <div className="row g-4">
               {truck.menu.map((item, index) => (
-                <div key={index} className="col-md-6 mb-3">
-                  <div
-                    className="card h-100 border-0 shadow"
-                    style={{
-                      transition: 'transform 0.2s, box-shadow 0.2s',
-                      cursor: 'pointer',
-                      backgroundColor: '#f8f9fa',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.03)';
-                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                    }}
-                  >
+                <div key={index} className="col-md-6">
+                  <div className="card h-100 shadow-sm border-0">
                     <div className="card-body">
-                      <h5 className="card-title text-dark">{item.item}</h5>
-                      <h6 className="card-subtitle mb-2 text-success fw-bold">${item.price.toFixed(2)}</h6>
-                      <p className="card-text text-muted" style={{ fontSize: '0.9rem' }}>
-                        {item.description || 'No description available'}
-                      </p>
-                      {item.dietary && item.dietary.length > 0 && (
-                        <div className="mt-2">
-                          {item.dietary.map((diet, idx) => (
-                            <span key={idx} className="badge bg-success-subtle text-dark me-1">
+                      <h5 className="card-title fw-bold">{item.item}</h5>
+                      <h6 className="text-success mb-2">${item.price.toFixed(2)}</h6>
+                      <p className="text-muted mb-3">{item.description || 'No description'}</p>
+                      {item.dietary?.length > 0 && (
+                        <div className="d-flex flex-wrap gap-2">
+                          {item.dietary.map((diet, i) => (
+                            <span key={i} className="badge bg-success-subtle text-success">
                               {diet}
                             </span>
                           ))}
@@ -141,110 +105,73 @@ const TruckPage = ({ data }) => {
               ))}
             </div>
           ) : (
-            <p className="text-muted text-center">No menu items available.</p>
+            <div className="alert alert-info">
+              No menu items available yet.
+            </div>
           )}
         </div>
 
-        {/* Right Column: Details */}
-        <div className="col-md-4">
-          <div className="card shadow-sm">
+        {/* Map + Details */}
+        <div className="col-lg-4">
+          <div className="card shadow-sm border-0 mb-4">
             <div className="card-body">
-              <h3 className="card-title">Details</h3>
-              <h5>About</h5>
-              <p>{truck.description || 'No description available'}</p>
-
-              <h5>Hours</h5>
-              <p>{truck.hours || 'Not specified'}</p>
-
-              <h5>Location</h5>
-              <p>{location?.address || 'Not specified'}</p>
-              {location?.lat && location?.lng && (
-                <LoadScript googleMapsApiKey={process.env.GATSBY_GOOGLE_MAPS_API_KEY}>
-                  <GoogleMap
-                    mapContainerStyle={{ height: '200px', width: '100%' }}
-                    center={mapCenter}
-                    zoom={15}
-                  >
-                    <Marker
-                      position={mapCenter}
-                      onClick={() => setSelectedMarker(truck)}
-                    />
-                    {selectedMarker && (
-                      <InfoWindow
-                        position={mapCenter}
-                        onCloseClick={() => setSelectedMarker(null)}
-                      >
-                        <div>
-                          <h6>{truck.name}</h6>
-                          <p>{location.address}</p>
-                        </div>
-                      </InfoWindow>
-                    )}
-                  </GoogleMap>
-                </LoadScript>
-              )}
-
-              <h5 className="mt-3">Contact</h5>
-              <p>Phone: {truck.phone || 'Not specified'}</p>
-              <p>Email: {truck.email || 'Not specified'}</p>
-              <p>
-                Website:{' '}
-                {truck.website ? (
-                  <a href={truck.website} target="_blank" rel="noopener noreferrer">
-                    Visit Website
-                  </a>
-                ) : (
-                  'Not specified'
-                )}
-              </p>
-
-              <h5>Socials</h5>
-              {truck.socials && truck.socials.length > 0 ? (
-                <ul className="list-unstyled">
-                  {truck.socials.map((social, index) => (
-                    <li key={index}>
-                      <a
-                        href={social.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-decoration-none text-success"
-                        style={{ transition: 'color 0.2s' }}
-                        onMouseEnter={(e) => (e.target.style.color = '#28a745')}
-                        onMouseLeave={(e) => (e.target.style.color = '#198754')}
-                      >
-                        {social.platform || 'Social Link'}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-muted">No socials available.</p>
-              )}
+              <h4 className="mb-3">Location</h4>
+              <p className="mb-3">{truck.address || 'No address available'}</p>
+              <LoadScript googleMapsApiKey={process.env.GATSBY_GOOGLE_MAPS_API_KEY}>
+                <GoogleMap
+                  mapContainerStyle={{ width: '100%', height: '300px' }}
+                  center={mapCenter}
+                  zoom={15}
+                >
+                  <Marker position={mapCenter} onClick={() => setSelectedMarker(true)} />
+                  {selectedMarker && (
+                    <InfoWindow position={mapCenter} onCloseClick={() => setSelectedMarker(null)}>
+                      <div>
+                        <strong>{truck.name}</strong>
+                        <br />
+                        {truck.address}
+                      </div>
+                    </InfoWindow>
+                  )}
+                </GoogleMap>
+              </LoadScript>
             </div>
           </div>
         </div>
       </div>
-  </TLayout>
+    </TLayout>
   );
 };
 
 export const query = graphql`
-query {
-  allMongodbFoodtruckalleyFoodTrucks {
-    nodes {
+  query TruckDetail($truck_id: String!) {
+    mongodbFoodtruckalleyFoodTrucks(truck_id: { eq: $truck_id }) {
       id
       truck_id
       name
-      cuisine
       status
-      mainLocation { lat lng }
-      eventLocation { lat lng }
-      isAtEvent
-      menu { dietary }
-      images { url alt }
+      address
+      location {
+        type
+        coordinates
+      }
+      cuisines
+      specialties
+      menu {
+        item
+        price
+        dietary
+        description
+      }
+      phone
+      email
+      images {
+        url
+        alt
+      }
+      last_updated
     }
   }
-}
 `;
 
 export default TruckPage;

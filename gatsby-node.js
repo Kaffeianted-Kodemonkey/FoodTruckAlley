@@ -1,4 +1,5 @@
-exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
+// gatsby-node.js
+exports.createSchemaCustomization = ({ actions }) => {
   const { createTypes } = actions;
 
   const typeDefs = `
@@ -6,45 +7,34 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       id: ID!
       truck_id: String
       name: String!
-      cuisine: [String!]
       status: String
-      hours: String
-      mainLocation: MongodbFoodtruckalleyFoodTrucksMainLocation
-      eventLocation: MongodbFoodtruckalleyFoodTrucksEventLocation
-      isAtEvent: Boolean
+      address: String
+      location: MongodbFoodtruckalleyFoodTrucksLocation
+      cuisines: [MongodbFoodtruckalleyCuisines!] @link(from: "cuisines", by: "id")
+      specialties: [MongodbFoodtruckalleySpecialties!] @link(from: "specialties", by: "id")
       menu: [MongodbFoodtruckalleyFoodTrucksMenuItem!]!
       phone: String
       email: String
-      socials: MongodbFoodtruckalleyFoodTrucksSocials
-      attending_events: MongodbFoodtruckalleyFoodTrucksEvents
-      images: [MongodbFoodtruckalleyFoodTrucksImages!]
-      last_updated: String
+      socials: [MongodbFoodtruckalleyFoodTrucksSocialItem!]!
+      images: [MongodbFoodtruckalleyFoodTrucksImage!]!
+      hours: MongodbFoodtruckalleyFoodTrucksHours
+      events: [String!]!                # Future array of event IDs
+      last_updated: Date
+      createdAt: Date
     }
 
-    type MongodbFoodtruckalleyFoodTrucksMainLocation {
-      lat: Float
-      lng: Float
-      address: String
+    type MongodbFoodtruckalleyFoodTrucksLocation {
+      type: String!                     # "Point"
+      coordinates: [Float!]!            # [lng, lat]
     }
 
-    type MongodbFoodtruckalleyFoodTrucksEventLocation {
-      lat: Float
-      lng: Float
-      address: String
+    type MongodbFoodtruckalleyFoodTrucksSocialItem {
+      platform: String!
+      url: String!
     }
 
-    type MongodbFoodtruckalleyFoodTrucksSocials {
-      facebook: String
-      twitter: String
-      instagram: String
-    }
-
-    type MongodbFoodtruckalleyFoodTrucksEvents {
-      Event: [String!]!
-    }
-
-    type MongodbFoodtruckalleyFoodTrucksImages {
-      url: String
+    type MongodbFoodtruckalleyFoodTrucksImage {
+      url: String!
       alt: String
     }
 
@@ -52,15 +42,39 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       item: String!
       price: Float!
       dietary: [String!]!
-      description: String!
+      description: String
+    }
+
+    type MongodbFoodtruckalleyFoodTrucksHours {
+      open: String
+      close: String
+      days: String
+    }
+
+    # Reference collections – keep as-is
+    type MongodbFoodtruckalleyCuisines implements Node {
+      id: ID!
+      name: String!
+      slug: String
+      description: String
+    }
+
+    type MongodbFoodtruckalleySpecialties implements Node {
+      id: ID!
+      name: String!
+      slug: String
+      description: String
+      category: String
     }
   `;
 
   createTypes(typeDefs);
 };
 
+// Optional: Dynamic page creation for individual trucks
 exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions;
+
   const result = await graphql(`
     query {
       allMongodbFoodtruckalleyFoodTrucks {
@@ -73,15 +87,16 @@ exports.createPages = async ({ graphql, actions }) => {
   `);
 
   if (result.errors) {
-    console.error('GraphQL query error:', result.errors);
+    console.error('Error creating truck pages:', result.errors);
     return;
   }
 
   result.data.allMongodbFoodtruckalleyFoodTrucks.nodes.forEach(({ truck_id, id }) => {
+    const slug = truck_id || id;
     createPage({
-      path: `/truck/${truck_id || id}`,
+      path: `/truck/${slug}`,
       component: require.resolve('./src/templates/truck.js'),
-      context: { truck_id: truck_id || id },
+      context: { truck_id: slug },
     });
   });
 };

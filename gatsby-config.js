@@ -17,18 +17,35 @@ module.exports = {
       resolve: `gatsby-source-mongodb`,
       options: {
         connectionString: process.env.MONGODB_URI,
-        dbName: process.env.MONGODB_DB,
-        collection: [process.env.MONGODB_COLLECTION],
-        extraFields: {
-          'food_trucks.socials': 'MongodbFoodtruckalleyFoodTrucksSocials',
-          'food_trucks.attending_events': 'MongodbFoodtruckalleyFoodTrucksEvents'
-        },
+        dbName: process.env.MONGODB_DB || 'foodtruckalley',
+        collection: 'food_trucks',
+        preserveObjectIds: true,
         extraParams: {
-          ssl: true,
-          authSource: "admin",
           retryWrites: true,
-          w: "majority"
+          w: 'majority'
         }
+      }
+    },
+
+    // Cuisines collection
+    {
+      resolve: `gatsby-source-mongodb`,
+      options: {
+        connectionString: process.env.MONGODB_URI,
+        dbName: process.env.MONGODB_DB || 'foodtruckalley',
+        collection: 'cuisines',
+        preserveObjectIds: true
+      }
+    },
+
+    // Specialties collection
+    {
+      resolve: `gatsby-source-mongodb`,
+      options: {
+        connectionString: process.env.MONGODB_URI,
+        dbName: process.env.MONGODB_DB || 'foodtruckalley',
+        collection: 'specialties',
+        preserveObjectIds: true
       }
     },
   ],

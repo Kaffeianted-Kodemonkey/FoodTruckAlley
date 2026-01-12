@@ -1,138 +1,140 @@
+// src/pages/truck-dir.js
 import * as React from 'react';
-import { useState } from 'react';
 import { graphql, Link } from 'gatsby';
 import TLayout from '../components/trucklayout';
 
 const TruckDirectory = ({ data }) => {
   const foodTrucks = data?.allMongodbFoodtruckalleyFoodTrucks?.nodes || [];
-  const [filteredTrucks] = useState(foodTrucks);
 
   return (
     <TLayout>
-      <h3 className="mb-4">Food Truck Directory</h3>
+      <div className="container py-5">
+        <h1 className="display-5 fw-bold text-success mb-4 text-center">
+          Food Truck Directory
+        </h1>
+        <p className="lead text-center text-muted mb-5">
+          Browse all registered food trucks in the Food Truck Alley network.
+        </p>
 
-      {filteredTrucks.length === 0 ? (
-        <div className="alert alert-warning" role="alert">
-          No food trucks available. Please check your database connection.
-        </div>
-      ) : (
-        <div className="row">
-          <div className="col-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-hover align-middle">
-                <thead className="table-light">
-                  <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Current Location</th>
-                    <th scope="col">Hours</th>
-                    <th scope="col">Phone</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Details & Information</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTrucks.map((truck) => {
-                    const currentAddress = truck.isAtEvent && truck.eventLocation?.address
-                      ? truck.eventLocation.address
-                      : truck.mainLocation?.address || 'Not specified';
-
-                    return (
-                      <tr key={truck.truck_id || truck.id}>
-                        {/* Name */}
-                        <td className="fw-semibold">{truck.name || 'Unnamed Truck'}</td>
-
-                        {/* Status */}
-                        <td>
-                          <span
-                            className={`badge rounded-pill px-3 py-1 ${
-                              truck.status === 'Open' ? 'bg-success' : 'bg-danger'
-                            }`}
-                          >
-                            {truck.status || 'Unknown'}
-                          </span>
-                        </td>
-
-                        {/* Location */}
-                        <td className="small">{currentAddress}</td>
-
-                        {/* Hours */}
-                        <td className="small">{truck.hours || 'Not specified'}</td>
-
-                        {/* Phone → Click to Call */}
-                        <td>
-                          {truck.phone ? (
-                            <a
-                              href={`tel:${truck.phone.replace(/[^+\d]/g, '')}`}
-                              className="text-decoration-none text-primary fw-medium"
-                              aria-label={`Call ${truck.name}`}
-                            >
-                              {truck.phone}
-                            </a>
-                          ) : (
-                            <span className="text-muted">Not specified</span>
-                          )}
-                        </td>
-
-                        {/* Email → Click to Email */}
-                        <td>
-                          {truck.email ? (
-                            <a
-                              href={`mailto:${truck.email}`}
-                              className="text-decoration-none text-primary fw-medium"
-                              aria-label={`Email ${truck.name}`}
-                            >
-                              {truck.email}
-                            </a>
-                          ) : (
-                            <span className="text-muted">Not specified</span>
-                          )}
-                        </td>
-
-                        {/* Actions */}
-                        <td>
-                          <div className="btn-group" role="group">
-                            <Link
-                              to={`/truck/${truck.truck_id || truck.id}`}
-                              className="btn btn-sm btn-success"
-                            >
-                              View Map
-                            </Link>
-
-                            <Link
-                              to={`/truck/${truck.truck_id || truck.id}`}
-                              className="btn btn-sm btn-warning"
-                            >
-                              View Profile
-                            </Link>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+        {foodTrucks.length === 0 ? (
+          <div className="alert alert-warning text-center py-5" role="alert">
+            <h4>No food trucks found</h4>
+            <p className="mb-0">
+              The directory is empty or there was an issue loading data. Please check your database connection.
+            </p>
           </div>
+        ) : (
+          <div className="table-responsive shadow-sm rounded-3 overflow-hidden">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="bg-success text-white">
+                <tr>
+                  <th scope="col" className="ps-4">Truck Name</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Current Location</th>
+                  <th scope="col">Phone</th>
+                  <th scope="col">Email</th>
+                  <th scope="col" className="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {foodTrucks.map((truck) => {
+                  const address = truck.address || 'Location not specified';
+
+                  return (
+                    <tr key={truck.truck_id || truck.id} className="border-bottom">
+                      <td className="ps-4 fw-semibold text-dark">
+                        {truck.name || 'Unnamed Truck'}
+                      </td>
+                      <td>
+                        <span
+                          className={`badge rounded-pill px-3 py-2 fs-6 ${
+                            truck.status === 'Open'
+                              ? 'bg-success text-white'
+                              : 'bg-secondary text-white'
+                          }`}
+                        >
+                          {truck.status || 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="small text-muted">
+                        {address}
+                      </td>
+                      <td>
+                        {truck.phone ? (
+                          <a
+                            href={`tel:${truck.phone.replace(/[^+\d]/g, '')}`}
+                            className="text-success text-decoration-none fw-medium"
+                            aria-label={`Call ${truck.name}`}
+                          >
+                            {truck.phone}
+                          </a>
+                        ) : (
+                          <span className="text-muted small">Not specified</span>
+                        )}
+                      </td>
+                      <td>
+                        {truck.email ? (
+                          <a
+                            href={`mailto:${truck.email}`}
+                            className="text-success text-decoration-none fw-medium"
+                            aria-label={`Email ${truck.name}`}
+                          >
+                            {truck.email}
+                          </a>
+                        ) : (
+                          <span className="text-muted small">Not specified</span>
+                        )}
+                      </td>
+                      <td className="text-center">
+                        <div className="btn-group" role="group">
+                          <Link
+                            to={`/truck/${truck.truck_id || truck.id}`}
+                            className="btn btn-sm btn-outline-success"
+                            title="View Map"
+                          >
+                          Map
+                          </Link>
+                          <Link
+                            to={`/truck/${truck.truck_id || truck.id}`}
+                            className="btn btn-sm btn-warning text-white"
+                            title="View Full Profile"
+                          >
+                          Profile
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="text-center mt-5 text-muted small">
+          <p>
+            Showing <strong>{foodTrucks.length}</strong> food truck{foodTrucks.length !== 1 ? 's' : ''} in the directory.
+          </p>
         </div>
-      )}
+      </div>
     </TLayout>
   );
 };
 
+// Updated GraphQL query
 export const query = graphql`
-  query {
+  query TruckDirectoryQuery {
     allMongodbFoodtruckalleyFoodTrucks {
       nodes {
         id
         truck_id
         name
-        cuisine
         status
-        hours
-        mainLocation { address, lat, lng }
-        eventLocation { address, lat, lng }
-        isAtEvent
+        address
+        location {
+          type
+          coordinates
+        }
         phone
         email
       }
