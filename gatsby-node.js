@@ -10,8 +10,8 @@ exports.createSchemaCustomization = ({ actions }) => {
       status: String
       address: String
       location: MongodbFoodtruckalleyFoodTrucksLocation
-      cuisines: [MongodbFoodtruckalleyCuisines!] @link(from: "cuisines", by: "id")
-      specialties: [MongodbFoodtruckalleySpecialties!] @link(from: "specialties", by: "id")
+      cuisines: String!
+      specialties: String!
       menu: [MongodbFoodtruckalleyFoodTrucksMenuItem!]!
       phone: String
       email: String
@@ -49,22 +49,6 @@ exports.createSchemaCustomization = ({ actions }) => {
       open: String
       close: String
       days: String
-    }
-
-    # Reference collections – keep as-is
-    type MongodbFoodtruckalleyCuisines implements Node {
-      id: ID!
-      name: String!
-      slug: String
-      description: String
-    }
-
-    type MongodbFoodtruckalleySpecialties implements Node {
-      id: ID!
-      name: String!
-      slug: String
-      description: String
-      category: String
     }
   `;
 

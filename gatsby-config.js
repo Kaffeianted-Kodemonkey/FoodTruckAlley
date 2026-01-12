@@ -26,27 +26,5 @@ module.exports = {
         }
       }
     },
-
-    // Cuisines collection
-    {
-      resolve: `gatsby-source-mongodb`,
-      options: {
-        connectionString: process.env.MONGODB_URI,
-        dbName: process.env.MONGODB_DB || 'foodtruckalley',
-        collection: 'cuisines',
-        preserveObjectIds: true
-      }
-    },
-
-    // Specialties collection
-    {
-      resolve: `gatsby-source-mongodb`,
-      options: {
-        connectionString: process.env.MONGODB_URI,
-        dbName: process.env.MONGODB_DB || 'foodtruckalley',
-        collection: 'specialties',
-        preserveObjectIds: true
-      }
-    },
   ],
 };
