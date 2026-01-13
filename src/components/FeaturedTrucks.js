@@ -1,42 +1,25 @@
 // src/components/FeaturedTrucks.js
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { Link } from 'gatsby';
 import { StaticImage } from "gatsby-plugin-image";
 
-// Internal card component (no longer exported)
-const TruckCard = memo(({ truck, cuisineMap = {}, specialtyMap = {} }) => {
+const TruckCard = memo(({ truck }) => {
   const hasImage = truck.images?.[0]?.url && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(truck.images[0].url);
 
-  // Resolve cuisine names with debug fallback
-  const cuisineNames = useMemo(() => {
-    const names = (truck.cuisines || [])
-      .map(id => {
-        const idStr = id?.toString();
-        const cuisine = cuisineMap[idStr];
-        return cuisine ? cuisine.name : `Unknown (${idStr})`;
-      })
-      .filter(Boolean);
-    return names.length > 0 ? names.join(' • ') : 'Various';
-  }, [truck.cuisines, cuisineMap]);
+  // Join all cuisine names (or fallback)
+  const cuisineList = truck.cuisines?.length > 0
+    ? truck.cuisines.map(c => c.name).join(' • ')
+    : 'Various';
 
-  // Resolve specialty names
-  const specialtyNames = useMemo(() => {
-    const names = (truck.specialties || [])
-      .map(id => {
-        const idStr = id?.toString();
-        const specialty = specialtyMap[idStr];
-        return specialty ? specialty.name : `Unknown (${idStr})`;
-      })
-      .filter(Boolean);
-    return names.length > 0 ? names.join(' • ') : '';
-  }, [truck.specialties, specialtyMap]);
-
-  // Debug per truck (remove in production)
-  console.log(`Truck ${truck.name} cuisines:`, truck.cuisines, '→', cuisineNames);
+  // Join all specialty names (or empty if none)
+  const specialtyList = truck.specialties?.length > 0
+    ? truck.specialties.map(s => s.name).join(' • ')
+    : '';
 
   return (
     <div className="col">
       <div className="card h-100 shadow-sm rounded-4 overflow-hidden border-0">
+        {/* Image */}
         {hasImage ? (
           <img
             src={truck.images[0].url}
@@ -54,15 +37,24 @@ const TruckCard = memo(({ truck, cuisineMap = {}, specialtyMap = {} }) => {
             loading="lazy"
           />
         )}
-        <div className="row">
-          <div className="col-6 fs-5 text-center">
-            <p><strong>Open: {truck.hours.open}</strong></p>
+
+        {/* Hours */}
+        <div className="row mt-2 px-3">
+          <div className="col-4 text-center">
+            <p className="mb-0 fw-bold">Open:</p>
+            <p className="mb-0">{truck.hours?.open || 'N/A'}</p>
           </div>
-          <div className="col-6 fs-5 text-center">
-            <p><strong>Close: {truck.hours.close}</strong></p>
+          <div className="col-4 text-center">
+            <p className="mb-0 fs-5 fw-bold">{truck.hours.days}</p>
+          </div>
+          <div className="col-4 text-center">
+            <p className="mb-0 fw-bold">Close:</p>
+            <p className="mb-0">{truck.hours?.close || 'N/A'}</p>
           </div>
         </div>
-        <hr />
+        <hr className="my-2" />
+
+        {/* Status badge */}
         <div className="position-absolute top-0 end-0 m-2">
           <span
             className={`badge rounded-pill px-3 py-1 fs-7 fw-semibold text-white ${
@@ -72,18 +64,33 @@ const TruckCard = memo(({ truck, cuisineMap = {}, specialtyMap = {} }) => {
             {truck.status === 'Open' ? 'Open' : 'Closed'}
           </span>
         </div>
+
+        {/* Card body */}
         <div className="card-body d-flex flex-column p-3">
-          <h6 className="card-title fw-bold text-primary mb-1 text-truncate">
-            {truck.name || 'Unnamed Truck'}
-          </h6>
-          <p className="card-text small text-muted mb-2 text-truncate">
-            {cuisineNames}
-          </p>
-          {specialtyNames && (
-            <p className="card-text small text-muted mb-2 text-truncate fst-italic">
-              {specialtyNames}
-            </p>
-          )}
+          <h2 className="card-title fw-bold text-primary mb-2 text-truncate text-center">
+            <u>{truck.name || 'Unnamed Truck'}</u>
+          </h2>
+
+          {/* Contact info */}
+          <p className="text-center small mb-2 fs-6 fw-bold"> {truck.address || 'No address'} </p>
+          <p className="text-center small mb-2 fs-6 "> {truck.phone || 'No phone'} • {truck.email || 'No email'}</p>
+
+
+          <hr className="my-2" />
+
+          {/* Cuisines & Specialties */}
+          <div className="row text-center small mb-3">
+            <div className="col-6 mb-2">
+              <h3 className="fs-4"><strong>Cuisines</strong></h3>
+              <p className="mb-0 fs-5">{cuisineList}</p>
+            </div>
+            <div className="col-6">
+              <h3 className="fs-4"><strong>Specialties</strong></h3>
+              <p className="mb-0 fs-5">{specialtyList || 'None'}</p>
+            </div>
+          </div>
+
+          {/* Buttons */}
           <div className="btn-group mt-auto">
             <Link to={`/truck/${truck.truck_id || truck.id}`} className="btn btn-sm btn-success">
               View Map
@@ -96,38 +103,11 @@ const TruckCard = memo(({ truck, cuisineMap = {}, specialtyMap = {} }) => {
       </div>
     </div>
   );
-}, (prev, next) =>
-  prev.truck.id === next.truck.id &&
-  prev.cuisineMap === next.cuisineMap &&
-  prev.specialtyMap === next.specialtyMap
-);
+}, (prev, next) => prev.truck.id === next.truck.id);
 
 TruckCard.displayName = 'TruckCard';
 
-// Reusable helper to build ID → object map
-const createReferenceMap = (items = []) => {
-  const map = {};
-  items.forEach(item => {
-    if (item?.id) {
-      map[item.id.toString()] = item;
-    }
-  });
-  return map;
-};
-
-const FeaturedTrucks = ({ trucks = [], limit = 12, cuisines = [], specialties = [] }) => {
-  // Debug: Confirm data arrival
-  console.log('FeaturedTrucks props:', {
-    trucks: trucks.length,
-    cuisines: cuisines.length,
-    firstCuisineId: cuisines[0]?.id,
-    firstCuisineName: cuisines[0]?.name,
-    specialties: specialties.length
-  });
-
-  const cuisineMap = useMemo(() => createReferenceMap(cuisines), [cuisines]);
-  const specialtyMap = useMemo(() => createReferenceMap(specialties), [specialties]);
-
+const FeaturedTrucks = ({ trucks = [], limit = 12 }) => {
   const display = trucks.slice(0, limit);
 
   if (!display.length) {
@@ -144,8 +124,6 @@ const FeaturedTrucks = ({ trucks = [], limit = 12, cuisines = [], specialties = 
         <TruckCard
           key={truck.truck_id || truck.id}
           truck={truck}
-          cuisineMap={cuisineMap}
-          specialtyMap={specialtyMap}
         />
       ))}
     </div>
@@ -153,4 +131,3 @@ const FeaturedTrucks = ({ trucks = [], limit = 12, cuisines = [], specialties = 
 };
 
 export default memo(FeaturedTrucks);
-  

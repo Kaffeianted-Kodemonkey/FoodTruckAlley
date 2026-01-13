@@ -155,8 +155,12 @@ export const query = graphql`
         type
         coordinates
       }
-      cuisines
-      specialties
+      cuisines {
+        name
+      }
+      specialties {
+        name
+      }
       menu {
         item
         price

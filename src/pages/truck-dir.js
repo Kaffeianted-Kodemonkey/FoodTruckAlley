@@ -92,14 +92,14 @@ const TruckDirectory = ({ data }) => {
                             className="btn btn-sm btn-outline-success"
                             title="View Map"
                           >
-                          Map
+                            📍 Map
                           </Link>
                           <Link
                             to={`/truck/${truck.truck_id || truck.id}`}
                             className="btn btn-sm btn-warning text-white"
                             title="View Full Profile"
                           >
-                          Profile
+                            👀 Profile
                           </Link>
                         </div>
                       </td>

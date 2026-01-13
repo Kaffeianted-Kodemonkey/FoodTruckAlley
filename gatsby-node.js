@@ -11,7 +11,7 @@ exports.createSchemaCustomization = ({ actions }) => {
       address: String
       location: MongodbFoodtruckalleyFoodTrucksLocation
       cuisines: String!
-      specialties: String!
+      specialties: String!!
       menu: [MongodbFoodtruckalleyFoodTrucksMenuItem!]!
       phone: String
       email: String
@@ -49,6 +49,19 @@ exports.createSchemaCustomization = ({ actions }) => {
       open: String
       close: String
       days: String
+    }
+
+    type MongodbFoodtruckalleyFoodTrucksCuisine {
+      name: String!
+      slug: String
+      description: String
+    }
+
+    type MongodbFoodtruckalleyFoodTrucksSpecialty {
+      name: String!
+      slug: String
+      description: String
+      category: String
     }
   `;
 

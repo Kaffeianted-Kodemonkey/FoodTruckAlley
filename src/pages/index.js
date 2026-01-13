@@ -10,8 +10,6 @@ import TLayout from '../components/trucklayout';
 
 const Homepage = ({ data }) => {
   const foodTrucks = data?.allMongodbFoodtruckalleyFoodTrucks?.nodes || [];
-  const cuisines = data?.allMongodbFoodtruckalleyCuisines?.nodes || [];
-  const specialties = data?.allMongodbFoodtruckalleySpecialties?.nodes || [];
 
   const [filteredTrucks, setFilteredTrucks] = useState(foodTrucks);
   const [searchLocation, setSearchLocation] = useState(null);
@@ -29,7 +27,6 @@ const Homepage = ({ data }) => {
     setTravelPath(path);
   }, []);
 
-  // Streamlined display logic with memo
   const displayTrucks = useMemo(() =>
     filteredTrucks.length === foodTrucks.length ? initialFeatured : filteredTrucks,
     [filteredTrucks, foodTrucks.length, initialFeatured]
@@ -45,8 +42,6 @@ const Homepage = ({ data }) => {
               <h4 className="text-primary fw-bold mb-4">Find Food Trucks</h4>
               <FoodTruckSearch
                 foodTrucks={foodTrucks}
-                cuisines={cuisines}
-                specialties={specialties}
                 onFilterChange={handleFilterChange}
               />
             </div>
@@ -54,7 +49,7 @@ const Homepage = ({ data }) => {
 
           {/* Map + Results */}
           <div className="col-md-9 bg-success-subtle d-flex flex-column">
-            <div className="img-thumbnail mt-3 mx-3 p-3" >
+            <div className="img-thumbnail mt-3 mx-3 p-3 flex-grow-1" style={{ minHeight: '550px' }}>
               <Map filteredTrucks={filteredTrucks} searchLocation={searchLocation} travelPath={travelPath} />
             </div>
 
@@ -72,8 +67,6 @@ const Homepage = ({ data }) => {
                   <FeaturedTrucks
                     trucks={displayTrucks}
                     limit={12}
-                    cuisines={data?.allMongodbFoodtruckalleyCuisines?.nodes || []}
-                    specialties={data?.allMongodbFoodtruckalleySpecialties?.nodes || []}
                   />
                 )}
               </div>
@@ -103,8 +96,17 @@ export const query = graphql`
           close
           days
         }
-        cuisines
-        specialties
+        cuisines {
+          name
+          slug
+          description
+        }
+        specialties {
+          name
+          slug
+          description
+          category
+        }
         menu {
           item
           price
@@ -118,21 +120,6 @@ export const query = graphql`
           alt
         }
         last_updated
-      }
-    }
-
-    allMongodbFoodtruckalleyCuisines {
-      nodes {
-        id
-        name
-        slug
-      }
-    }
-    allMongodbFoodtruckalleySpecialties {
-      nodes {
-        id
-        name
-        slug
       }
     }
   }

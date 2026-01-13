@@ -1,5 +1,6 @@
 // src/components/FoodTruckSearch.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { memo, useMemo } from 'react'; 
+import { useState, useEffect, useRef } from 'react';
 import { loadGoogleMaps } from '../utils/googleMapsLoader';
 
 // Haversine distance in miles
@@ -14,8 +15,6 @@ const haversineDistance = (c1, c2) => {
 
 const FoodTruckSearch = ({
   foodTrucks = [],
-  cuisines = [],          // Array of { id, name, slug, description }
-  specialties = [],       // Array of { id, name, slug, description, category }
   onFilterChange
 }) => {
   const [filteredTrucks, setFilteredTrucks] = useState(foodTrucks);
@@ -27,14 +26,25 @@ const FoodTruckSearch = ({
   const [truckName, setTruckName] = useState('');
   const [vegan, setVegan] = useState(false);
   const [gf, setGf] = useState(false);
-  const [selectedCuisines, setSelectedCuisines] = useState([]); // array of cuisine id strings
-  const [selectedSpecialties, setSelectedSpecialties] = useState([]); // array of specialty id strings
+  const [selectedCuisines, setSelectedCuisines] = useState([]);
+  const [selectedSpecialties, setSelectedSpecialties] = useState([]);
   const [locationInput, setLocationInput] = useState('');
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
   const [maxDistanceMiles, setMaxDistanceMiles] = useState(50);
 
   const prev = useRef({ filteredTrucks: [], searchLocation: null, travelPath: null });
+
+  // Derive unique cuisines and specialties from foodTrucks (since embedded)
+  const uniqueCuisines = useMemo(() => {
+    const allCuisines = foodTrucks.flatMap(truck => truck.cuisines || []);
+    return [...new Map(allCuisines.map(c => [c.name, c])).values()];
+  }, [foodTrucks]);
+
+  const uniqueSpecialties = useMemo(() => {
+    const allSpecialties = foodTrucks.flatMap(truck => truck.specialties || []);
+    return [...new Map(allSpecialties.map(s => [s.name, s])).values()];
+  }, [foodTrucks]);
 
   // Core filtering logic
   useEffect(() => {
@@ -46,11 +56,11 @@ const FoodTruckSearch = ({
 
       // Cuisines
       const cuisineMatch = selectedCuisines.length === 0 ||
-        (truck.cuisines || []).some(id => selectedCuisines.includes(id.toString()));
+        selectedCuisines.some(selectedName => truck.cuisines?.some(c => c.name === selectedName));
 
       // Specialties
       const specialtyMatch = selectedSpecialties.length === 0 ||
-        (truck.specialties || []).some(id => selectedSpecialties.includes(id.toString()));
+        selectedSpecialties.some(selectedName => truck.specialties?.some(s => s.name === selectedName));
 
       // Dietary
       const hasVegan = truck.menu?.some(m => m.dietary?.includes('Vegan')) ?? false;
@@ -247,39 +257,39 @@ const FoodTruckSearch = ({
       {/* Cuisines */}
       <div className="mb-5">
         <h6 className="fw-bold text-primary mb-3">Cuisine Type</h6>
-        {cuisines.length === 0 ? (
-          <p className="text-muted small">Loading cuisines...</p>
+        {uniqueCuisines.length === 0 ? (
+          <p className="text-muted small">No cuisines available</p>
         ) : (
           <div className="d-flex flex-column gap-2">
-            <div className="row">
-              {cuisines.map((cuisine) => (
-                <div className="col-6">
-                  <div key={cuisine.id} className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      id={`cuisine-${cuisine.id}`}
-                      value={cuisine.id}
-                      checked={selectedCuisines.includes(cuisine.id.toString())}
-                      onChange={(e) => {
-                        const idStr = cuisine.id.toString();
-                        setSelectedCuisines((prev) =>
-                          e.target.checked
-                            ? [...prev, idStr]
-                            : prev.filter((id) => id !== idStr)
-                        );
-                      }}
-                    />
-                    <label
-                      className="form-check-label"
-                      htmlFor={`cuisine-${cuisine.id}`}
-                    >
-                      {cuisine.name}
-                    </label>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {uniqueCuisines.map((cuisine) => (
+              <div key={cuisine.name} className="form-check">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id={`cuisine-${cuisine.name}`}
+                  value={cuisine.name}
+                  checked={selectedCuisines.includes(cuisine.name)}
+                  onChange={(e) => {
+                    setSelectedCuisines(prev =>
+                      e.target.checked
+                        ? [...prev, cuisine.name]
+                        : prev.filter(name => name !== cuisine.name)
+                    );
+                  }}
+                />
+                <label
+                  className="form-check-label"
+                  htmlFor={`cuisine-${cuisine.name}`}
+                >
+                  {cuisine.name}
+                  {cuisine.description && (
+                    <small className="text-muted d-block">
+                      {cuisine.description}
+                    </small>
+                  )}
+                </label>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -287,39 +297,39 @@ const FoodTruckSearch = ({
       {/* Specialties */}
       <div className="mb-5">
         <h6 className="fw-bold text-primary mb-3">Specialties (Desserts & Drinks)</h6>
-        {specialties.length === 0 ? (
-          <p className="text-muted small">Loading specialties...</p>
+        {uniqueSpecialties.length === 0 ? (
+          <p className="text-muted small">No specialties available</p>
         ) : (
           <div className="d-flex flex-column gap-2">
-            <div className="row">
-              {specialties.map((specialty) => (
-                <div className="col-6">
-                  <div key={specialty.id} className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      id={`specialty-${specialty.id}`}
-                      value={specialty.id}
-                      checked={selectedSpecialties.includes(specialty.id.toString())}
-                      onChange={(e) => {
-                        const idStr = specialty.id.toString();
-                        setSelectedCuisines((prev) =>
-                          e.target.checked
-                            ? [...prev, idStr]
-                            : prev.filter((id) => id !== idStr)
-                        );
-                      }}
-                    />
-                    <label
-                      className="form-check-label"
-                      htmlFor={`specialty-${specialty.id}`}
-                    >
-                      {specialty.name}
-                    </label>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {uniqueSpecialties.map((specialty) => (
+              <div key={specialty.name} className="form-check">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id={`specialty-${specialty.name}`}
+                  value={specialty.name}
+                  checked={selectedSpecialties.includes(specialty.name)}
+                  onChange={(e) => {
+                    setSelectedSpecialties(prev =>
+                      e.target.checked
+                        ? [...prev, specialty.name]
+                        : prev.filter(name => name !== specialty.name)
+                    );
+                  }}
+                />
+                <label
+                  className="form-check-label"
+                  htmlFor={`specialty-${specialty.name}`}
+                >
+                  {specialty.name}
+                  {specialty.description && (
+                    <small className="text-muted d-block">
+                      {specialty.description}
+                    </small>
+                  )}
+                </label>
+              </div>
+            ))}
           </div>
         )}
       </div>
