@@ -5,7 +5,7 @@ require("dotenv").config({
  * @type {import('gatsby').GatsbyConfig}
  */
 module.exports = {
-  pathPrefix: "https://kfn8dkodemonkey.github.io/FTA/",   // ← your repo name
+  pathPrefix:"https://kfn8dkodemonkey.github.io/FTA/",
   siteMetadata: {
     siteUrl: "https://www.yourdomain.tld",
     title: "Food Truck Alley",
