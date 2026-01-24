@@ -11,7 +11,7 @@ exports.createSchemaCustomization = ({ actions }) => {
       address: String
       location: MongodbFoodtruckalleyFoodTrucksLocation
       cuisines: String!
-      specialties: String!!
+      specialties: String!
       menu: [MongodbFoodtruckalleyFoodTrucksMenuItem!]!
       phone: String
       email: String

@@ -5,6 +5,7 @@ require("dotenv").config({
  * @type {import('gatsby').GatsbyConfig}
  */
 module.exports = {
+  pathPrefix:"/FTA",
   siteMetadata: {
     siteUrl: "https://www.yourdomain.tld",
     title: "Food Truck Alley",

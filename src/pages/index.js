@@ -39,7 +39,9 @@ const Homepage = ({ data }) => {
           {/* Search Panel */}
           <div className="col-md-3 bg-white border-end d-flex flex-column">
             <div className="p-4 flex-grow-1 overflow-auto">
-              <h4 className="text-primary fw-bold mb-4">Find Food Trucks</h4>
+              <h2 className="text-orange fw-bold mb-4">Find Food Trucks</h2>
+
+              <hr />
               <FoodTruckSearch
                 foodTrucks={foodTrucks}
                 onFilterChange={handleFilterChange}
