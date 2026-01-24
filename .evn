@@ -1,4 +1,4 @@
 GATSBY_GOOGLE_MAPS_API_KEY=AIzaSyBZ127VkVLAhoiVWxjMJ17fn9dnQCEbd2A
-MONGODB_URI=mongodb+srv://kaffeinatedkodemonkey:Girlz4x42!@foodtruckalleydb.b0in5w1.mongodb.net/?retryWrites=true&w=majority&appName=FoodTruckAlleyDB
+MONGODB_URI=mongodb+srv://kaffeinatedkodemonkey:Girlz4x42!@foodtruckalleydb.b0in5w1.mongodb.net/?appName=FoodTruckAlleyDB
 MONGODB_DB=foodtruckalley
 MONGODB_COLLECTION=food_trucks
