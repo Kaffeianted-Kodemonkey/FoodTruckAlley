@@ -17,13 +17,12 @@ module.exports = {
     {
       resolve: `gatsby-source-mongodb`,
       options: {
-        connectionString: process.env.MONGODB_URI,
-        dbName: process.env.MONGODB_DB || 'foodtruckalley',
-        collection: 'food_trucks',
-        preserveObjectIds: true,
-        extraParams: {
-          retryWrites: true,
-          w: 'majority'
+        connectionString: process.env.MONGODB_URI,  // ← use env var!
+        dbName: "foodtruckalley",                   // ← your actual DB name
+        collection: ["foodtrucks"],                 // ← your collection(s), e.g. array if multiple
+        // Optional extras if needed:
+        // extraParams: { authSource: "admin" },
+        // clientOptions: { useNewUrlParser: true, useUnifiedTopology: true },
         }
       }
     },
