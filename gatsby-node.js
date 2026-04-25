@@ -1,99 +1,104 @@
 // gatsby-node.js
+const path = require(`path`);
+
+/**
+ * Define the schema for local JSON data.
+ * This ensures GraphQL queries don't break even if a JSON file is empty.
+ */
 exports.createSchemaCustomization = ({ actions }) => {
   const { createTypes } = actions;
-
   const typeDefs = `
-    type MongodbFoodtruckalleyFoodTrucks implements Node {
-      id: ID!
-      truck_id: String
-      name: String!
+    type TrucksJson implements Node {
+      title: String!
+      slug: String!
+      cuisine: String
       status: String
-      address: String
-      location: MongodbFoodtruckalleyFoodTrucksLocation
-      cuisines: String!
-      specialties: String!
-      menu: [MongodbFoodtruckalleyFoodTrucksMenuItem!]!
+      hours: String
+      location: String
+      description: String
+      isUpgraded: Boolean
+      lat: Float
+      lng: Float
       phone: String
-      email: String
-      socials: [MongodbFoodtruckalleyFoodTrucksSocialItem!]!
-      images: [MongodbFoodtruckalleyFoodTrucksImage!]!
-      hours: MongodbFoodtruckalleyFoodTrucksHours
-      events: [String!]!                # Future array of event IDs
-      last_updated: Date
-      createdAt: Date
+      instagram: String
+      menu: [MenuItem]
     }
 
-    type MongodbFoodtruckalleyFoodTrucksLocation {
-      type: String!                     # "Point"
-      coordinates: [Float!]!            # [lng, lat]
+    type MenuItem {
+      name: String
+      price: String
+      diet: String
     }
 
-    type MongodbFoodtruckalleyFoodTrucksSocialItem {
-      platform: String!
-      url: String!
-    }
-
-    type MongodbFoodtruckalleyFoodTrucksImage {
-      url: String!
-      alt: String
-    }
-
-    type MongodbFoodtruckalleyFoodTrucksMenuItem {
-      item: String!
-      price: Float!
-      dietary: [String!]!
+    type EventsJson implements Node {
+      title: String!
+      slug: String!
+      location: String
+      date: String
+      time: String
       description: String
-    }
-
-    type MongodbFoodtruckalleyFoodTrucksHours {
-      open: String
-      close: String
-      days: String
-    }
-
-    type MongodbFoodtruckalleyFoodTrucksCuisine {
-      name: String!
-      slug: String
-      description: String
-    }
-
-    type MongodbFoodtruckalleyFoodTrucksSpecialty {
-      name: String!
-      slug: String
-      description: String
-      category: String
+      isUpgraded: Boolean
+      lat: Float
+      lng: Float
+      amenities: [String]
     }
   `;
-
   createTypes(typeDefs);
 };
 
-// Optional: Dynamic page creation for individual trucks
-exports.createPages = async ({ graphql, actions }) => {
+/**
+ * Generate individual pages for both trucks and events.
+ */
+exports.createPages = async ({ graphql, actions, reporter }) => {
   const { createPage } = actions;
 
+  // 1. Query local JSON nodes for both types
   const result = await graphql(`
-    query {
-      allMongodbFoodtruckalleyFoodTrucks {
+    {
+      allTrucksJson {
         nodes {
-          truck_id
           id
+          slug
+          isUpgraded
+        }
+      }
+      allEventsJson {
+        nodes {
+          id
+          slug
+          isUpgraded
         }
       }
     }
   `);
 
   if (result.errors) {
-    console.error('Error creating truck pages:', result.errors);
+    reporter.panicOnBuild(`Error while running GraphQL query to create pages.`, result.errors);
     return;
   }
 
-  result.data.allMongodbFoodtruckalleyFoodTrucks.nodes.forEach(({ truck_id, id }) => {
-    const slug = truck_id || id;
+  // 2. Use the unified "Listing Details" template
+  const sharedTemplate = path.resolve(`./src/templates/listing-details.js`);
+
+  // 3. Create pages for TRUCKS
+  const trucks = result.data?.allTrucksJson?.nodes || [];
+  trucks.forEach((truck) => {
     createPage({
-      path: `/truck/${slug}`,
-      component: require.resolve('./src/templates/truck.js'),
-      context: { truck_id: slug },
+      path: `/trucks/${truck.slug}`,
+      component: sharedTemplate,
+      context: { id: truck.id },
+      defer: !truck.isUpgraded, 
+    });
+  });
+
+  // 4. Create pages for EVENTS
+  const events = result.data?.allEventsJson?.nodes || [];
+  events.forEach((event) => {
+    createPage({
+      path: `/events/${event.slug}`,
+      component: sharedTemplate,
+      context: { id: event.id },
+      defer: !event.isUpgraded, 
     });
   });
 };

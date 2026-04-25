@@ -1,130 +1,110 @@
-// pages/index.js
+// src/pages/index.js
 import * as React from 'react';
-import { useState, useMemo, useCallback } from 'react';
 import { graphql } from 'gatsby';
-
-import FoodTruckSearch from '../components/FoodTruckSearch';
-import FeaturedTrucks from '../components/FeaturedTrucks';
-import Map from '../components/Map';
-import TLayout from '../components/trucklayout';
+import { useState } from 'react';
+import Layout from '../components/layout';
+import DirectoryListing from '../components/DirectoryListing';
+import FeaturedSlider from '../components/FeaturedSlider';
 
 const Homepage = ({ data }) => {
-  const foodTrucks = data?.allMongodbFoodtruckalleyFoodTrucks?.nodes || [];
+  const [activeTab, setActiveTab] = useState('Trucks');
+  const [expandedId, setExpandedId] = useState(null);
 
-  const [filteredTrucks, setFilteredTrucks] = useState(foodTrucks);
-  const [searchLocation, setSearchLocation] = useState(null);
-  const [travelPath, setTravelPath] = useState(null);
+  // GraphQL provides the data from your JSON files
+  const trucksList = data.allTrucksJson.nodes;
+  const eventsList = data.allEventsJson.nodes;
 
-  // Memoized featured trucks
-  const initialFeatured = useMemo(() =>
-    [...foodTrucks].sort(() => 0.5 - Math.random()).slice(0, 6),
-    [foodTrucks]
-  );
+  // Filter for the spotlight section based on the active tab
+  const featuredItems = activeTab === 'Trucks' 
+    ? trucksList.filter(t => t.isUpgraded) 
+    : eventsList.filter(e => e.isUpgraded);
 
-  const handleFilterChange = useCallback((trucks, loc, path) => {
-    setFilteredTrucks(trucks);
-    setSearchLocation(loc);
-    setTravelPath(path);
-  }, []);
-
-  const displayTrucks = useMemo(() =>
-    filteredTrucks.length === foodTrucks.length ? initialFeatured : filteredTrucks,
-    [filteredTrucks, foodTrucks.length, initialFeatured]
-  );
+  const handleOpenDetails = (item) => {
+    console.log("Opening details for:", item.title);
+  };
 
   return (
-    <TLayout>
-      <div className="bg-success-subtle d-flex flex-column min-vh-100">
-        <div className="flex-grow-1 d-flex">
-          {/* Search Panel */}
-          <div className="col-md-3 bg-white border-end d-flex flex-column">
-            <div className="p-4 flex-grow-1 overflow-auto">
-              <h2 className="text-orange fw-bold mb-4">Find Food Trucks</h2>
+    // Pass the lists to Layout so the Gmap can render pins
+    <Layout 
+      activeTab={activeTab} 
+      trucks={trucksList} 
+      events={eventsList}
+    > 
+      <FeaturedSlider 
+        items={featuredItems} 
+        title={activeTab === 'Trucks' ? "Featured Trucks" : "Featured Events"}
+        onOpenDetails={handleOpenDetails}
+      />
 
-              <hr />
-              <FoodTruckSearch
-                foodTrucks={foodTrucks}
-                onFilterChange={handleFilterChange}
+      <div className="container-fluid p-0">
+        <div className="row px-3 mt-3">
+          <ul className="nav nav-tabs border-1">
+            {['Trucks', 'event'].map(tab => (
+              <li className="nav-item" key={tab}>
+                <button 
+                  className={`nav-link border-0 text-capitalize ${activeTab === tab ? 'active fw-bold border-bottom border-primary' : ''}`}
+                  onClick={() => { setActiveTab(tab); setExpandedId(null); }}
+                >
+                  {tab}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="row g-0">
+          <div className="col-12">
+            {(activeTab === 'Trucks' ? trucksList : eventsList).map(item => (
+              <DirectoryListing 
+                key={item.id} 
+                item={item} 
+                type={activeTab} 
+                isOpen={expandedId === item.id}
+                onToggle={() => setExpandedId(expandedId === item.id ? null : item.id)}
               />
-            </div>
-          </div>
-
-          {/* Map + Results */}
-          <div className="col-md-9 bg-success-subtle d-flex flex-column">
-            <div className="img-thumbnail mt-3 mx-3 p-3 flex-grow-1" style={{ minHeight: '550px' }}>
-              <Map filteredTrucks={filteredTrucks} searchLocation={searchLocation} travelPath={travelPath} />
-            </div>
-
-            <div className="border-top">
-              <div className="container-fluid px-3 py-4">
-                <h2 className="text-success fs-1 fw-bold mb-3">
-                  {filteredTrucks.length === foodTrucks.length ? 'Featured Trucks' : `Search Results (${filteredTrucks.length})`}
-                </h2>
-                {displayTrucks.length === 0 ? (
-                  <div className="text-center py-5 text-muted">
-                    <strong>No trucks match your search.</strong><br />
-                    Try adjusting filters or expanding your area.
-                  </div>
-                ) : (
-                  <FeaturedTrucks
-                    trucks={displayTrucks}
-                    limit={12}
-                  />
-                )}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
-    </TLayout>
+    </Layout>
   );
 };
 
+// src/pages/index.js
 export const query = graphql`
-  query HomepageQuery {
-    allMongodbFoodtruckalleyFoodTrucks {
+  query MockDataQuery {
+    allTrucksJson {
       nodes {
         id
-        truck_id
-        name
+        title
+        slug  # Ensure this is here
+        cuisine
         status
-        address
-        location {
-          type
-          coordinates
-        }
-        hours {
-          open
-          close
-          days
-        }
-        cuisines {
-          name
-          slug
-          description
-        }
-        specialties {
-          name
-          slug
-          description
-          category
-        }
-        menu {
-          item
-          price
-          dietary
-          description
-        }
-        phone
-        email
-        images {
-          url
-          alt
-        }
-        last_updated
+        hours
+        location
+        isUpgraded
+      }
+    }
+    allEventsJson {
+      nodes {
+        id
+        title
+        slug  # ADD THIS LINE: If it's missing, links will break
+        location
+        date
+        isUpgraded
       }
     }
   }
 `;
 
 export default Homepage;
+
+export function Head() {
+  return (
+    <>
+      <title>Food Truck Alley | Find Local Food Trucks & Events</title>
+      <meta name="description" content="Discover the best local food trucks and upcoming foodie events in your area." />
+    </>
+  )
+}

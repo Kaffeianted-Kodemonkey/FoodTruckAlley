@@ -2,48 +2,42 @@
 import * as React from 'react';
 import { Link } from 'gatsby';
 
-const Navbar = () => (
-  <nav className="border-bottom">
-    <div className="bg-success-subtle border-bottom">
-      <div className="container d-flex justify-content-between align-items-center py-3">
-        <ul className="nav me-auto">
-          <li className="nav-item">
-            <Link to="/" className="nav-link link-body-emphasis">Home</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/truck-dir" className="nav-link link-body-emphasis">Truck Directory</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/pricing" className="nav-link link-body-emphasis">Pricing</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/faqs" className="nav-link link-body-emphasis">FAQs</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/about" className="nav-link link-body-emphasis">About</Link>
-          </li>
-        </ul>
-        <ul className="nav">
-          <li className="nav-item">
-            <Link to="/login" className="nav-link link-body-emphasis">Login</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/signup" className="nav-link link-body-emphasis">Sign up</Link>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div className="bg-success text-light py-3">
-      <div className="container d-flex align-items-center">
-        <div className="col-md-5 text-center text-md-start">
-          <p className="m-0">Logo Here</p>
+const Navbar = ({ onToggleSearch }) => {
+  return (
+    <nav className="navbar navbar-dark bg-dark px-3 shadow-sm sticky-top" style={{ zIndex: 1100 }}>
+      <div className="container-fluid p-0">
+        
+        {/* HAMBURGER / SEARCH TRIGGER */}
+        <button 
+          className="btn btn-outline-light me-3 d-flex align-items-center" 
+          onClick={onToggleSearch}
+          type="button"
+          aria-label="Toggle Search"
+        >
+          <i className="bi bi-list fs-5 me-2"></i>
+          <span className="d-none d-sm-inline">Find Food</span>
+        </button>
+
+        {/* LOGO / BRAND */}
+        <Link className="navbar-brand fw-bold flex-grow-1" to="/">
+          <i className="bi bi-truck text-warning me-2"></i>
+          FoodTruck<span className="text-warning">Alley</span>
+        </Link>
+
+        {/* USER PROFILE / SETTINGS */}
+        <div className="d-flex align-items-center gap-3">
+          <Link to="/_profile" className="btn btn-sm btn-warning rounded-pill px-3 fw-bold">
+            Sign In
+          </Link>
+          
+          <button className="btn btn-link text-white p-0" title="Settings">
+            <i className="bi bi-gear fs-5"></i>
+          </button>
         </div>
-        <div className="col-md-7 text-center text-md-start">
-          <h1 className="m-0">Food Truck Alley</h1>
-        </div>
+
       </div>
-    </div>
-  </nav>
-);
+    </nav>
+  );
+};
 
 export default Navbar;

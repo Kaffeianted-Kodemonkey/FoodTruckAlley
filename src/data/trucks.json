@@ -1,0 +1,79 @@
+[
+  {
+    "id": "t1",
+    "slug": "taco-tracker",
+    "title": "The Taco Tracker",
+    "cuisine": "Mexican Fusion",
+    "status": "Open Now",
+    "hours": "11am - 8pm",
+    "location": "Civic Center Park",
+    "description": "Award winning street tacos with a modern twist. Known for our signature jackfruit carnitas and handmade tortillas.",
+    "isUpgraded": true,
+    "lat": 39.7392,
+    "lng": -104.9903,
+    "phone": "303-555-0123",
+    "instagram": "@tacotracker",
+    "menu": [
+      { "name": "Signature Al Pastor", "price": "$4.50", "diet": "GF" },
+      { "name": "Jackfruit Carnitas", "price": "$4.50", "diet": "Vegan, GF" },
+      { "name": "Elote Corn Cup", "price": "$6.00", "diet": "Vegetarian" }
+    ]
+  },
+  {
+    "id": "t2",
+    "slug": "burger-bus",
+    "title": "Burger Bus",
+    "cuisine": "Gourmet American",
+    "status": "Open Now",
+    "hours": "12pm - 9pm",
+    "location": "North Park District",
+    "description": "Grass-fed beef burgers served on toasted brioche buns. Voted best burger in the city three years running.",
+    "isUpgraded": true,
+    "lat": 39.7400,
+    "lng": -104.9850,
+    "phone": "303-555-0199",
+    "instagram": "@burgerbus_co",
+    "menu": [
+      { "name": "The Classic Double", "price": "$12.00", "diet": "" },
+      { "name": "Truffle Fries", "price": "$7.00", "diet": "Vegetarian" }
+    ]
+  },
+  {
+    "id": "t3",
+    "slug": "waffle-wagon",
+    "title": "Waffle Wagon",
+    "cuisine": "Breakfast & Brunch",
+    "status": "Closing Soon",
+    "hours": "8am - 2pm",
+    "location": "Union Station",
+    "description": "Sweet and savory waffles for any time of day. We specialize in Belgian-style pearls and chicken-and-waffle pairings.",
+    "isUpgraded": false,
+    "lat": 39.7547,
+    "lng": -105.0000,
+    "phone": "303-555-0155",
+    "instagram": "@wafflewagon_denver",
+    "menu": [
+      { "name": "Chicken & Waffles", "price": "$14.00", "diet": "" },
+      { "name": "Strawberry Pearl Waffle", "price": "$9.00", "diet": "Vegetarian" }
+    ]
+  },
+  {
+    "id": "t4",
+    "slug": "pizza-planet",
+    "title": "Pizza Planet",
+    "cuisine": "Italian / Wood-Fired",
+    "status": "Open Now",
+    "hours": "4pm - 11pm",
+    "location": "RiNo District",
+    "description": "Mobile wood-fired oven bringing authentic Neapolitan pizza to the streets. Fresh ingredients and 48-hour fermented dough.",
+    "isUpgraded": false,
+    "lat": 39.7620,
+    "lng": -104.9820,
+    "phone": "303-555-0188",
+    "instagram": "@pizzaplanet_mobile",
+    "menu": [
+      { "name": "Margherita", "price": "$13.00", "diet": "Vegetarian" },
+      { "name": "Spicy Soppressata", "price": "$15.00", "diet": "" }
+    ]
+  }
+]

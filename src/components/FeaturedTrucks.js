@@ -1,133 +1,64 @@
-// src/components/FeaturedTrucks.js
-import React, { memo } from 'react';
-import { Link } from 'gatsby';
-import { StaticImage } from "gatsby-plugin-image";
+// src/components/FeaturedTruck.js
+import * as React from 'react';
 
-const TruckCard = memo(({ truck }) => {
-  const hasImage = truck.images?.[0]?.url && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(truck.images[0].url);
+const FeaturedTruck = ({ truck, onOpenDetails }) => {
+  // Use the passed truck data, or fallback to mock data for safety
+  const t = truck || {
+    title: "The Taco Tracker",
+    cuisine: "Mexican Fusion",
+    status: "Open Now",
+    hours: "11am - 8pm",
+    dietary: "Vegan/GF Options",
+    location: "Civic Center Park"
+  };
 
-  // Join all cuisine names (or fallback)
-  const cuisineList = truck.cuisines?.length > 0
-    ? truck.cuisines.map(c => c.name).join(' • ')
-    : 'Various';
-
-  // Join all specialty names (or empty if none)
-  const specialtyList = truck.specialties?.length > 0
-    ? truck.specialties.map(s => s.name).join(' • ')
-    : '';
+  const isOpen = t.status === "Open Now";
 
   return (
-    <div className="col">
-      <div className="card h-100 shadow-sm rounded-4 overflow-hidden border-0">
-        {/* Image */}
-        {hasImage ? (
-          <img
-            src={truck.images[0].url}
-            alt={truck.images[0].alt || truck.name}
-            className="card-img-top"
-            style={{ height: '200px', objectFit: 'cover' }}
-            loading="lazy"
-          />
-        ) : (
-          <StaticImage
-            src="https://ordering.port-royal.com/wp-content/uploads/woocommerce-placeholder-e1686240333544.png"
-            alt={truck.name + ' - placeholder'}
-            className="card-img-top mx-auto"
-            style={{ width: '50%', height: 'auto', objectFit: 'cover' }}
-            loading="lazy"
-          />
-        )}
-
-        {/* Hours */}
-        <div className="row mt-2 px-3">
-          <div className="col-4 text-center">
-            <p className="mb-0 fw-bold">Open:</p>
-            <p className="mb-0">{truck.hours?.open || 'N/A'}</p>
-          </div>
-          <div className="col-4 text-center">
-            <p className="mb-0 fs-5 fw-bold">{truck.hours.days}</p>
-          </div>
-          <div className="col-4 text-center">
-            <p className="mb-0 fw-bold">Close:</p>
-            <p className="mb-0">{truck.hours?.close || 'N/A'}</p>
-          </div>
-        </div>
-        <hr className="my-2" />
-
-        {/* Status badge */}
-        <div className="position-absolute top-0 end-0 m-2">
-          <span
-            className={`badge rounded-pill px-3 py-1 fs-7 fw-semibold text-white ${
-              truck.status === 'Open' ? 'bg-success' : 'bg-secondary'
-            }`}
-          >
-            {truck.status === 'Open' ? 'Open' : 'Closed'}
+    <div className="card h-100 border-0 shadow-sm overflow-hidden" style={{ borderRadius: '15px' }}>
+      <div className="card-body p-3">
+        
+        {/* Top Row: Title & Status */}
+        <div className="d-flex justify-content-between align-items-start mb-1">
+          <h5 className="card-title fw-bold mb-0 text-truncate" style={{ maxWidth: '70%' }}>
+            {t.title}
+          </h5>
+          <span className={`badge rounded-pill ${isOpen ? 'bg-success' : 'bg-danger'}`} style={{ fontSize: '0.7rem' }}>
+            {t.status}
           </span>
         </div>
 
-        {/* Card body */}
-        <div className="card-body d-flex flex-column p-3">
-          <h2 className="card-title fw-bold text-primary mb-2 text-truncate text-center">
-            <u>{truck.name || 'Unnamed Truck'}</u>
-          </h2>
+        {/* Cuisine & Dietary */}
+        <div className="mb-3">
+          <span className="text-primary small fw-bold">{t.cuisine}</span>
+          <span className="text-muted small mx-1">•</span>
+          <span className="text-muted small">{t.dietary}</span>
+        </div>
 
-          {/* Contact info */}
-          <p className="text-center small mb-2 fs-6 fw-bold"> {truck.address || 'No address'} </p>
-          <p className="text-center small mb-2 fs-6 "> {truck.phone || 'No phone'} • {truck.email || 'No email'}</p>
-
-
-          <hr className="my-2" />
-
-          {/* Cuisines & Specialties */}
-          <div className="row text-center small mb-3">
-            <div className="col-6 mb-2">
-              <h3 className="fs-4"><strong>Cuisines</strong></h3>
-              <p className="mb-0 fs-5">{cuisineList}</p>
-            </div>
-            <div className="col-6">
-              <h3 className="fs-4"><strong>Specialties</strong></h3>
-              <p className="mb-0 fs-5">{specialtyList || 'None'}</p>
-            </div>
+        {/* Info Row: Hours & Location */}
+        <div className="row g-0 mb-3 border-top pt-2">
+          <div className="col-6">
+            <div className="text-muted small fw-bold text-uppercase" style={{ fontSize: '0.65rem' }}>Hours</div>
+            <div className="small">🕒 {t.hours}</div>
           </div>
-
-          {/* Buttons */}
-          <div className="btn-group mt-auto">
-            <Link to={`/truck/${truck.truck_id || truck.id}`} className="btn btn-sm btn-success">
-              View Map
-            </Link>
-            <Link to={`/truck/${truck.truck_id || truck.id}`} className="btn btn-sm btn-warning">
-              View Profile
-            </Link>
+          <div className="col-6 border-start ps-3">
+            <div className="text-muted small fw-bold text-uppercase" style={{ fontSize: '0.65rem' }}>Current Spot</div>
+            <div className="small text-truncate">📍 {t.location}</div>
           </div>
         </div>
+
+        {/* Action Button */}
+        <div className="d-grid">
+          <button 
+            className="btn btn-primary btn-sm rounded-pill fw-bold"
+            onClick={() => onOpenDetails(t)}
+          >
+            View Truck Details
+          </button>
+        </div>
       </div>
-    </div>
-  );
-}, (prev, next) => prev.truck.id === next.truck.id);
-
-TruckCard.displayName = 'TruckCard';
-
-const FeaturedTrucks = ({ trucks = [], limit = 12 }) => {
-  const display = trucks.slice(0, limit);
-
-  if (!display.length) {
-    return (
-      <div className="text-center text-muted py-5">
-        <p className="mb-0">No food trucks available.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-4">
-      {display.map(truck => (
-        <TruckCard
-          key={truck.truck_id || truck.id}
-          truck={truck}
-        />
-      ))}
     </div>
   );
 };
 
-export default memo(FeaturedTrucks);
+export default FeaturedTruck;

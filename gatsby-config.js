@@ -23,8 +23,15 @@ module.exports = {
         // Optional extras if needed:
         // extraParams: { authSource: "admin" },
         // clientOptions: { useNewUrlParser: true, useUnifiedTopology: true },
-        }
+        
       }
+    },
+    `gatsby-transformer-json`,
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        path: `./src/data/`, // Point to your JSON files
+      },
     },
   ],
 };

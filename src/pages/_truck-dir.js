@@ -1,13 +1,13 @@
 // src/pages/truck-dir.js
 import * as React from 'react';
-import { graphql, Link } from 'gatsby';
-import TLayout from '../components/trucklayout';
+//import { graphql, Link } from 'gatsby';
+import Layout from '../components/layout';
 
 const TruckDirectory = ({ data }) => {
   const foodTrucks = data?.allMongodbFoodtruckalleyFoodTrucks?.nodes || [];
 
   return (
-    <TLayout>
+    <Layout>
       <div className="container py-5">
         <h1 className="display-5 fw-bold text-success mb-4 text-center">
           Food Truck Directory
@@ -117,12 +117,12 @@ const TruckDirectory = ({ data }) => {
           </p>
         </div>
       </div>
-    </TLayout>
+    </Layout>
   );
 };
 
 // Updated GraphQL query
-export const query = graphql`
+{/*export const query = graphql`
   query TruckDirectoryQuery {
     allMongodbFoodtruckalleyFoodTrucks {
       nodes {
@@ -140,6 +140,6 @@ export const query = graphql`
       }
     }
   }
-`;
+`;*/}
 
 export default TruckDirectory;
