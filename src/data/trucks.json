@@ -16,10 +16,17 @@
     "lat": 39.7392,
     "lng": -104.9903,
     "isUpgraded": true,
-    "eventSchedule": ["e1", "e2"],
+    "eventSchedule": [
+      "e1",
+      "e2"
+    ],
     "description": "Award winning street tacos with a modern twist.",
     "menu": [
-      { "name": "Signature Al Pastor", "price": "$4.50", "diet": "GF" }
+      {
+        "name": "Signature Al Pastor",
+        "price": "$4.50",
+        "diet": "GF"
+      }
     ]
   },
   {
@@ -33,16 +40,51 @@
     "locationType": "manual",
     "currentEventId": null,
     "location": "Smith Parking Lot",
-     "city": "Vernal",
+    "city": "Vernal",
     "state": "UT",
     "lastUpdated": "2024-05-20T12:15:00Z",
     "lat": 39.7400,
     "lng": -104.9850,
     "isUpgraded": true,
-    "eventSchedule": ["e3"],
+    "eventSchedule": [
+      "e3"
+    ],
     "description": "Grass-fed beef burgers served on toasted brioche buns.",
     "menu": [
-      { "name": "The Classic Double", "price": "$12.00", "diet": "" }
+      {
+        "name": "The Classic Double",
+        "price": "$12.00",
+        "diet": ""
+      }
+    ]
+  },
+  {
+    "id": "t3",
+    "slug": "sticky-nickies",
+    "title": "Sticky Nickies",
+    "hours": "9am - 2pm",
+    "phone": "720-608-1444",
+    "cuisine": "BBQ",
+    "status": "Open Now",
+    "locationType": "manual",
+    "currentEventId": null,
+    "location": "Flaming Gorge",
+    "city": "Manila",
+    "state": "UT",
+    "lastUpdated": "2024-05-20T12:15:00Z",
+    "lat": 40.919210,
+    "lng": -109.435810,
+    "isUpgraded": false,
+    "eventSchedule": [
+      "e3"
+    ],
+    "description": "Best BBQ in UT and NW Co",
+    "menu": [
+      {
+        "name": "The Double Dipped Wings",
+        "price": "$15.00",
+        "diet": "Carnivore"
+      }
     ]
   }
 ]
