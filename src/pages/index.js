@@ -1,48 +1,41 @@
-// src/pages/index.js
 import * as React from 'react';
 import { graphql } from 'gatsby';
-import { useState } from 'react';
 import Layout from '../components/layout';
 import DirectoryListing from '../components/DirectoryListing';
 import FeaturedSlider from '../components/FeaturedSlider';
+import { SearchDataProvider, useSearchData } from '../context/SearchData';
 
-const Homepage = ({ data }) => {
-  const [activeTab, setActiveTab] = useState('Trucks');
-  const [expandedId, setExpandedId] = useState(null);
+// This inner component "tunes in" to the context
+const HomepageContent = ({ rawTrucks, rawEvents }) => {
+  const { 
+    activeTab, 
+    setActiveTab, 
+    filteredResults 
+  } = useSearchData();
 
-  // GraphQL provides the data from your JSON files
-  const trucksList = data.allTrucksJson.nodes;
-  const eventsList = data.allEventsJson.nodes;
+  const [expandedId, setExpandedId] = React.useState(null);
 
-  // Filter for the spotlight section based on the active tab
+  // Keep Featured Slider focused only on the premium partners
+  // Note: We use the raw data here so featured trucks stay visible even during search
   const featuredItems = activeTab === 'Trucks' 
-    ? trucksList.filter(t => t.isUpgraded) 
-    : eventsList.filter(e => e.isUpgraded);
-
-  const handleOpenDetails = (item) => {
-    console.log("Opening details for:", item.title);
-  };
+    ? rawTrucks.filter(t => t.isUpgraded) 
+    : rawEvents.filter(e => e.isUpgraded);
 
   return (
-    // Pass the lists to Layout so the Gmap can render pins
-    <Layout 
-      activeTab={activeTab} 
-      trucks={trucksList} 
-      events={eventsList}
-    > 
+    <Layout> 
       <FeaturedSlider 
         items={featuredItems} 
         title={activeTab === 'Trucks' ? "Featured Trucks" : "Featured Events"}
-        onOpenDetails={handleOpenDetails}
       />
 
       <div className="container-fluid p-0">
+        {/* Tab Navigation */}
         <div className="row px-3 mt-3">
-          <ul className="nav nav-tabs border-1">
-            {['Trucks', 'event'].map(tab => (
+          <ul className="nav nav-tabs border-0">
+            {['Trucks', 'Events'].map(tab => (
               <li className="nav-item" key={tab}>
                 <button 
-                  className={`nav-link border-0 text-capitalize ${activeTab === tab ? 'active fw-bold border-bottom border-primary' : ''}`}
+                  className={`nav-link border-0 text-capitalize ${activeTab === tab ? 'active fw-bold border-bottom border-primary border-3' : 'text-muted'}`}
                   onClick={() => { setActiveTab(tab); setExpandedId(null); }}
                 >
                   {tab}
@@ -52,17 +45,25 @@ const Homepage = ({ data }) => {
           </ul>
         </div>
 
+        {/* Directory List: Uses filteredResults from Context */}
         <div className="row g-0">
           <div className="col-12">
-            {(activeTab === 'Trucks' ? trucksList : eventsList).map(item => (
-              <DirectoryListing 
-                key={item.id} 
-                item={item} 
-                type={activeTab} 
-                isOpen={expandedId === item.id}
-                onToggle={() => setExpandedId(expandedId === item.id ? null : item.id)}
-              />
-            ))}
+            {filteredResults.length > 0 ? (
+              filteredResults.map(item => (
+                <DirectoryListing 
+                  key={item.id} 
+                  item={item} 
+                  type={activeTab} 
+                  isOpen={expandedId === item.id}
+                  onToggle={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                />
+              ))
+            ) : (
+              <div className="p-5 text-center text-muted">
+                <i className="bi bi-search fs-1 d-block mb-2 opacity-25"></i>
+                <p>No results found for your search filters.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -70,41 +71,55 @@ const Homepage = ({ data }) => {
   );
 };
 
-// src/pages/index.js
+// The main export wraps everything in the Provider
+const Homepage = ({ data }) => {
+  return (
+    <SearchDataProvider 
+      rawTrucks={data.allTrucksJson.nodes} 
+      rawEvents={data.allEventsJson.nodes}
+    >
+      <HomepageContent 
+        rawTrucks={data.allTrucksJson.nodes} 
+        rawEvents={data.allEventsJson.nodes} 
+      />
+    </SearchDataProvider>
+  );
+};
+
 export const query = graphql`
   query MockDataQuery {
     allTrucksJson {
       nodes {
         id
         title
-        slug  # Ensure this is here
+        slug
         cuisine
         status
         hours
         location
+        city
+        state
         isUpgraded
+        description
+        lat
+        lng
+        menu { name, price, diet }
       }
     }
     allEventsJson {
       nodes {
         id
         title
-        slug  # ADD THIS LINE: If it's missing, links will break
+        slug
         location
         date
         isUpgraded
+        description
+        lat
+        lng
       }
     }
   }
 `;
 
 export default Homepage;
-
-export function Head() {
-  return (
-    <>
-      <title>Food Truck Alley | Find Local Food Trucks & Events</title>
-      <meta name="description" content="Discover the best local food trucks and upcoming foodie events in your area." />
-    </>
-  )
-}

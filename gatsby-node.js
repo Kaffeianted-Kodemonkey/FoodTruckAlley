@@ -1,104 +1,29 @@
-// gatsby-node.js
-const path = require(`path`);
-
-/**
- * Define the schema for local JSON data.
- * This ensures GraphQL queries don't break even if a JSON file is empty.
- */
-exports.createSchemaCustomization = ({ actions }) => {
-  const { createTypes } = actions;
-  const typeDefs = `
-    type TrucksJson implements Node {
-      title: String!
-      slug: String!
-      cuisine: String
-      status: String
-      hours: String
-      location: String
-      description: String
-      isUpgraded: Boolean
-      lat: Float
-      lng: Float
-      phone: String
-      instagram: String
-      menu: [MenuItem]
-    }
-
-    type MenuItem {
-      name: String
-      price: String
-      diet: String
-    }
-
-    type EventsJson implements Node {
-      title: String!
-      slug: String!
-      location: String
-      date: String
-      time: String
-      description: String
-      isUpgraded: Boolean
-      lat: Float
-      lng: Float
-      amenities: [String]
-    }
-  `;
-  createTypes(typeDefs);
-};
-
-/**
- * Generate individual pages for both trucks and events.
- */
-exports.createPages = async ({ graphql, actions, reporter }) => {
+// Example gatsby-node.js logic
+exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions;
 
-  // 1. Query local JSON nodes for both types
   const result = await graphql(`
-    {
-      allTrucksJson {
-        nodes {
-          id
-          slug
-          isUpgraded
-        }
-      }
-      allEventsJson {
-        nodes {
-          id
-          slug
-          isUpgraded
-        }
-      }
+    query {
+      allTrucks: allTrucksJson { nodes { id slug } }
+      allEvents: allEventsJson { nodes { id slug } }
     }
   `);
 
-  if (result.errors) {
-    reporter.panicOnBuild(`Error while running GraphQL query to create pages.`, result.errors);
-    return;
-  }
-
-  // 2. Use the unified "Listing Details" template
-  const sharedTemplate = path.resolve(`./src/templates/listing-details.js`);
-
-  // 3. Create pages for TRUCKS
-  const trucks = result.data?.allTrucksJson?.nodes || [];
-  trucks.forEach((truck) => {
+  // Create Truck Landing Pages
+  result.data.allTrucks.nodes.forEach(truck => {
     createPage({
       path: `/trucks/${truck.slug}`,
-      component: sharedTemplate,
+      component: require.resolve(`./src/templates/Truck-LP.js`),
       context: { id: truck.id },
-      defer: !truck.isUpgraded, 
     });
   });
 
-  // 4. Create pages for EVENTS
-  const events = result.data?.allEventsJson?.nodes || [];
-  events.forEach((event) => {
+  // Create Event Landing Pages
+  result.data.allEvents.nodes.forEach(event => {
     createPage({
       path: `/events/${event.slug}`,
-      component: sharedTemplate,
+      component: require.resolve(`./src/templates/Event-LP.js`),
       context: { id: event.id },
-      defer: !event.isUpgraded, 
     });
   });
 };
